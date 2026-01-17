@@ -26,7 +26,7 @@ struct LELight
 
 Color gLEAmbientColor = { 127, 127, 127 };
 static std::vector<LELight> sLights;
-static s16 sLightID = 0;
+static s16 sLightID = -1;
 static enum LEMode sMode = LE_MODE_AFFECT_ALL_SHADED_AND_COLORED;
 static enum LEToneMapping sToneMapping = LE_TONE_MAPPING_WEIGHTED;
 static bool sEnabled = false;
@@ -235,7 +235,7 @@ C_FIELD s16 le_add_light(f32 x, f32 y, f32 z, u8 r, u8 g, u8 b, f32 radius, f32 
     if (sLights.size() >= LE_MAX_LIGHTS) { return -1; }
 
     LELight newLight;
-    newLight.id = sLightID++;
+    newLight.id = ++sLightID;
     newLight.posX = x;
     newLight.posY = y;
     newLight.posZ = z;
