@@ -108,7 +108,7 @@ static inline void le_tone_map(Color out, Color inAmbient, Vec3f inColor, float 
     }
 }
 
-static inline void le_calculate_light_contribution(LELight light, Vec3f pos, Vec3f normal, f32 lightIntensityScalar, Vec3f out_color, f32* weight) {
+static inline OPTIMIZE_O3 void le_calculate_light_contribution(const LELight& light, Vec3f pos, Vec3f normal, f32 lightIntensityScalar, Vec3f out_color, f32* weight) {
     // skip 'inactive' lights
     if (light.intensity <= 0 || light.radius <= 0) { return; }
 
@@ -154,7 +154,7 @@ C_FIELD OPTIMIZE_O3 void le_calculate_vertex_lighting(Vtx_t* v, Vec3f pos, Color
 
     // accumulate lighting
     f32 weight = 1.0f;
-    for (auto& light : sLights) {
+    for (const auto& light : sLights) {
         le_calculate_light_contribution(light, pos, NULL, 1.0f, color, &weight);
     }
 
@@ -173,7 +173,7 @@ C_FIELD OPTIMIZE_O3 void le_calculate_lighting_color(Vec3f pos, Color out, f32 l
 
     // accumulate lighting
     f32 weight = 1.0f;
-    for (auto& light : sLights) {
+    for (const auto& light : sLights) {
         le_calculate_light_contribution(light, pos, NULL, lightIntensityScalar, color, &weight);
     }
 
@@ -190,7 +190,7 @@ C_FIELD OPTIMIZE_O3 void le_calculate_lighting_color_with_normal(Vec3f pos, Vec3
 
     // accumulate lighting
     f32 weight = 1.0f;
-    for (auto& light : sLights) {
+    for (const auto& light : sLights) {
         le_calculate_light_contribution(light, pos, normal, lightIntensityScalar, color, &weight);
     }
 
@@ -255,14 +255,14 @@ C_FIELD s16 le_add_light(f32 x, f32 y, f32 z, u8 r, u8 g, u8 b, f32 radius, f32 
 C_FIELD void le_remove_light(s16 id) {
     if (id < 0) { return; }
 
-    s16 index = 0; 
-    for (auto& light : sLights) {
-        if (light.id == id) {
-            sLights.erase(sLights.begin() + index);
-            return;
-        }
-        index++;
-    }
+    sLights.erase(
+        std::remove_if(sLights.begin(), sLights.end(),
+            [id](const LELight& light) {
+                return light.id == id;
+            }
+        ),
+        sLights.end()
+    );
 }
 
 C_FIELD s16 le_get_light_count(void) {
@@ -272,67 +272,89 @@ C_FIELD s16 le_get_light_count(void) {
 C_FIELD bool le_light_exists(s16 id) {
     if (id < 0) { return false; }
 
-    for (auto& light : sLights) {
-        if (light.id == id) {
-            return true;
+    return std::any_of(sLights.begin(), sLights.end(),
+        [id](const LELight& light) {
+            return light.id == id;
         }
-    }
-
-    return false;
+    );
 }
 
 C_FIELD void le_get_light_pos(s16 id, VEC_OUT Vec3f out) {
     if (id < 0) { return; }
 
-    for (auto& light : sLights) {
-        if (light.id == id) {
-            vec3f_set(out, light.posX, light.posY, light.posZ);
+    auto it = std::find_if(sLights.begin(), sLights.end(),
+        [id](const LELight& light) {
+            return light.id == id;
         }
+    );
+
+    if (it != sLights.end()) {
+        LELight& light = *it;
+        vec3f_set(out, light.posX, light.posY, light.posZ);
     }
 }
 
 C_FIELD void le_set_light_pos(s16 id, f32 x, f32 y, f32 z) {
     if (id < 0) { return; }
 
-    for (auto& light : sLights) {
-        if (light.id == id) {
-            light.posX = x;
-            light.posY = y;
-            light.posZ = z;
+    auto it = std::find_if(sLights.begin(), sLights.end(),
+        [id](const LELight& light) {
+            return light.id == id;
         }
+    );
+
+    if (it != sLights.end()) {
+        LELight& light = *it;
+        light.posX = x;
+        light.posY = y;
+        light.posZ = z;
     }
 }
 
 C_FIELD void le_get_light_color(s16 id, VEC_OUT Color out) {
     if (id < 0) { return; }
 
-    for (auto& light : sLights) {
-        if (light.id == id) {
-            color_set(out, light.colorR, light.colorG, light.colorB);
+    auto it = std::find_if(sLights.begin(), sLights.end(),
+        [id](const LELight& light) {
+            return light.id == id;
         }
+    );
+
+    if (it != sLights.end()) {
+        LELight& light = *it;
+        color_set(out, light.colorR, light.colorG, light.colorB);
     }
 }
 
 C_FIELD void le_set_light_color(s16 id, u8 r, u8 g, u8 b) {
     if (id < 0) { return; }
 
-    for (auto& light : sLights) {
-        if (light.id == id) {
-            light.colorR = r;
-            light.colorG = g;
-            light.colorB = b;
+    auto it = std::find_if(sLights.begin(), sLights.end(),
+        [id](const LELight& light) {
+            return light.id == id;
         }
-    }
+    );
 
+    if (it != sLights.end()) {
+        LELight& light = *it;
+        light.colorR = r;
+        light.colorG = g;
+        light.colorB = b;
+    }
 }
 
 C_FIELD f32 le_get_light_radius(s16 id) {
     if (id < 0) { return 0.0f; }
 
-    for (auto& light : sLights) {
-        if (light.id == id) {
-            return light.radius;
+    auto it = std::find_if(sLights.begin(), sLights.end(),
+        [id](const LELight& light) {
+            return light.id == id;
         }
+    );
+
+    if (it != sLights.end()) {
+        LELight& light = *it;
+        return light.radius;
     }
 
     return 0.0f;
@@ -341,20 +363,30 @@ C_FIELD f32 le_get_light_radius(s16 id) {
 C_FIELD void le_set_light_radius(s16 id, f32 radius) {
     if (id < 0) { return; }
 
-    for (auto& light : sLights) {
-        if (light.id == id) {
-            light.radius = radius;
+    auto it = std::find_if(sLights.begin(), sLights.end(),
+        [id](const LELight& light) {
+            return light.id == id;
         }
+    );
+
+    if (it != sLights.end()) {
+        LELight& light = *it;
+        light.radius = radius;
     }
 }
 
 C_FIELD f32 le_get_light_intensity(s16 id) {
     if (id < 0) { return 0.0f; }
 
-    for (auto& light : sLights) {
-        if (light.id == id) {
-            return light.intensity;
+    auto it = std::find_if(sLights.begin(), sLights.end(),
+        [id](const LELight& light) {
+            return light.id == id;
         }
+    );
+
+    if (it != sLights.end()) {
+        LELight& light = *it;
+        return light.intensity;
     }
 
     return 0.0f;
@@ -363,20 +395,30 @@ C_FIELD f32 le_get_light_intensity(s16 id) {
 C_FIELD void le_set_light_intensity(s16 id, f32 intensity) {
     if (id < 0) { return; }
 
-    for (auto& light : sLights) {
-        if (light.id == id) {
-            light.intensity = intensity;
+    auto it = std::find_if(sLights.begin(), sLights.end(),
+        [id](const LELight& light) {
+            return light.id == id;
         }
+    );
+
+    if (it != sLights.end()) {
+        LELight& light = *it;
+        light.intensity = intensity;
     }
 }
 
 C_FIELD bool le_get_light_use_surface_normals(s16 id) {
     if (id < 0) { return false; }
 
-    for (auto& light : sLights) {
-        if (light.id == id) {
-            return light.useSurfaceNormals;
+    auto it = std::find_if(sLights.begin(), sLights.end(),
+        [id](const LELight& light) {
+            return light.id == id;
         }
+    );
+
+    if (it != sLights.end()) {
+        LELight& light = *it;
+        return light.useSurfaceNormals;
     }
 
     return false;
@@ -385,10 +427,15 @@ C_FIELD bool le_get_light_use_surface_normals(s16 id) {
 C_FIELD void le_set_light_use_surface_normals(s16 id, bool useSurfaceNormals) {
     if (id < 0) { return; }
 
-    for (auto& light : sLights) {
-        if (light.id == id) {
-            light.useSurfaceNormals = useSurfaceNormals;
+    auto it = std::find_if(sLights.begin(), sLights.end(),
+        [id](const LELight& light) {
+            return light.id == id;
         }
+    );
+
+    if (it != sLights.end()) {
+        LELight& light = *it;
+        light.useSurfaceNormals = useSurfaceNormals;
     }
 }
 
