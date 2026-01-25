@@ -7,6 +7,9 @@ extern "C" {
 #undef max
 #include <vector>
 #include <algorithm>
+#ifdef __SSE__
+#include <xmmintrin.h>
+#endif
 
 #define C_FIELD extern "C"
 
@@ -31,6 +34,14 @@ static enum LEMode sMode = LE_MODE_AFFECT_ALL_SHADED_AND_COLORED;
 static enum LEToneMapping sToneMapping = LE_TONE_MAPPING_WEIGHTED;
 static bool sEnabled = false;
 
+static inline f32 rsqrt(f32 value) {
+#ifdef __SSE__
+    return _mm_cvtss_f32(_mm_rsqrt_ss(_mm_set_ss(value)));
+#else
+    return 1.0f / sqrtf(value);
+#endif
+}
+
 static inline void color_set(Color color, u8 r, u8 g, u8 b) {
     color[0] = r;
     color[1] = g;
@@ -41,6 +52,14 @@ static inline void color_copy(Color dest, Color src) {
     dest[0] = src[0];
     dest[1] = src[1];
     dest[2] = src[2];
+}
+
+
+static inline u8 to_u8(float value) {
+    int v = (int)value;
+    v = v < 0 ? 0 : v;
+    v = v > 255 ? 255 : v;
+    return (u8)v;
 }
 
 C_FIELD bool le_is_enabled(void) {
@@ -72,21 +91,21 @@ C_FIELD void le_set_ambient_color(u8 r, u8 g, u8 b) {
 }
 
 static inline void le_tone_map_total_weighted(Color out, Color inAmbient, Vec3f inColor, float weight) {
-    out[0] = std::clamp((s32)((inAmbient[0] + inColor[0]) / weight), 0, 255);
-    out[1] = std::clamp((s32)((inAmbient[1] + inColor[1]) / weight), 0, 255);
-    out[2] = std::clamp((s32)((inAmbient[2] + inColor[2]) / weight), 0, 255);
+    out[0] = to_u8((inAmbient[0] + inColor[0]) / weight);
+    out[1] = to_u8((inAmbient[1] + inColor[1]) / weight);
+    out[2] = to_u8((inAmbient[2] + inColor[2]) / weight);
 }
 
 static inline void le_tone_map_weighted(Color out, Color inAmbient, Vec3f inColor, float weight) {
-    out[0] = std::clamp((s32)(inAmbient[0] + (inColor[0] / weight)), 0, 255);
-    out[1] = std::clamp((s32)(inAmbient[1] + (inColor[1] / weight)), 0, 255);
-    out[2] = std::clamp((s32)(inAmbient[2] + (inColor[2] / weight)), 0, 255);
+    out[0] = to_u8(inAmbient[0] + (inColor[0] / weight));
+    out[1] = to_u8(inAmbient[1] + (inColor[1] / weight));
+    out[2] = to_u8(inAmbient[2] + (inColor[2] / weight));
 }
 
 static inline void le_tone_map_clamp(Color out, Color inAmbient, Vec3f inColor) {
-    out[0] = std::clamp((s32)(inAmbient[0] + inColor[0]), 0, 255);
-    out[1] = std::clamp((s32)(inAmbient[1] + inColor[1]), 0, 255);
-    out[2] = std::clamp((s32)(inAmbient[2] + inColor[2]), 0, 255);
+    out[0] = to_u8(inAmbient[0] + inColor[0]);
+    out[1] = to_u8(inAmbient[1] + inColor[1]);
+    out[2] = to_u8(inAmbient[2] + inColor[2]);
 }
 
 static inline void le_tone_map_reinhard(Color out, Color inAmbient, Vec3f inColor) {
@@ -94,9 +113,9 @@ static inline void le_tone_map_reinhard(Color out, Color inAmbient, Vec3f inColo
     inColor[1] += inAmbient[1];
     inColor[2] += inAmbient[2];
 
-    out[0] = std::clamp((s32)((inColor[0] / (inColor[0] + 255.0f)) * 255.0f), 0, 255);
-    out[1] = std::clamp((s32)((inColor[1] / (inColor[1] + 255.0f)) * 255.0f), 0, 255);
-    out[2] = std::clamp((s32)((inColor[2] / (inColor[2] + 255.0f)) * 255.0f), 0, 255);
+    out[0] = to_u8((inColor[0] / (inColor[0] + 255.0f)) * 255.0f);
+    out[1] = to_u8((inColor[1] / (inColor[1] + 255.0f)) * 255.0f);
+    out[2] = to_u8((inColor[2] / (inColor[2] + 255.0f)) * 255.0f);
 }
 
 static inline void le_tone_map(Color out, Color inAmbient, Vec3f inColor, float weight) {
@@ -126,13 +145,13 @@ static inline OPTIMIZE_O3 void le_calculate_light_contribution(const LELight& li
     f32 att = 1.0f - (dist2 / radius2);
     f32 brightness = att * light.intensity * lightIntensityScalar;
 
-    // normalize diff
-    f32 invLen = 1.0f / sqrtf(dist2);
-    diffX *= invLen;
-    diffY *= invLen;
-    diffZ *= invLen;
-
     if (light.useSurfaceNormals && normal) {
+        // normalize diff
+        f32 invLen = rsqrt(dist2);
+        diffX *= invLen;
+        diffY *= invLen;
+        diffZ *= invLen;
+
         // lambert term
         f32 nl = (normal[0] * diffX) + (normal[1] * diffY) + (normal[2] * diffZ);
         if (nl <= 0.0f) { return; }
