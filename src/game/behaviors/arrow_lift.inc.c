@@ -59,22 +59,12 @@ static s8 arrow_lift_move_back(void) {
  * Arrow lift update function.
  */
 void bhv_arrow_lift_loop(void) {
-    if (!sync_object_is_initialized(o->oSyncID)) {
-        struct SyncObject *so = sync_object_init(o, SYNC_DISTANCE_ONLY_EVENTS);
-        if (so) {
-            sync_object_init_field(o, &o->oTimer);
-            sync_object_init_field(o, &o->oPrevAction);
-            sync_object_init_field(o, &o->oAction);
-        }
-    }
-
     switch (o->oAction) {
         case ARROW_LIFT_ACT_IDLE:
             // Wait 61 frames before moving.
             if (o->oTimer > 60) {
                 if (cur_obj_is_any_player_on_platform()) {
                     o->oAction = ARROW_LIFT_ACT_MOVING_AWAY;
-                    network_send_object(o);
                 }
             }
 

@@ -32,10 +32,6 @@ void bhv_snowmans_bottom_init(void) {
         o->parentObj = sp34;
     }
     spawn_object_abs_with_rot(o, 0, MODEL_NONE, bhvSnowmansBodyCheckpoint, -402, 461, -2898, 0, 0, 0);
-
-    sync_object_init(o, SYNC_DISTANCE_ONLY_EVENTS);
-    sync_object_init_field(o, &o->oAction);
-    sync_object_init_field(o, &o->oForwardVel);
 }
 
 void set_rolling_sphere_hitbox(void) {
@@ -144,7 +140,6 @@ void bhv_snowmans_bottom_loop(void) {
                 o->oForwardVel = 10.0f;
                 o->oAction = 1;
                 set_mario_npc_dialog(&gMarioStates[0], 0, NULL);
-                network_send_object(o);
             }
             break;
 
@@ -196,9 +191,6 @@ void bhv_snowmans_head_init(void) {
         o->oPosZ = 1813.0f;
         o->oAction = 1;
     }
-
-    sync_object_init(o, SYNC_DISTANCE_ONLY_EVENTS);
-    sync_object_init_field(o, &o->oAction);
 }
 
 static u8 bhv_snowmans_head_action_0_continue_dialog(void) {
@@ -244,7 +236,6 @@ void bhv_snowmans_head_loop(void) {
                 f32* starPos = gLevelValues.starPositions.SnowmanHeadStarPos;
                 spawn_default_star(starPos[0], starPos[1], starPos[2]);
                 o->oAction = 1;
-                network_send_object(o);
             }
             break;
     }

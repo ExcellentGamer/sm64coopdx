@@ -21,16 +21,6 @@ void bhv_sunken_ship_part_loop(void) {
 }
 
 void bhv_ship_part_3_loop(void) {
-    if (!sync_object_is_initialized(o->oSyncID)) {
-        struct SyncObject* so = sync_object_init(o, 4000.0f);
-        if (so) {
-            so->maxUpdateRate = 5.0f;
-            sync_object_init_field(o, &o->oFaceAnglePitch);
-            sync_object_init_field(o, &o->oFaceAngleRoll);
-            sync_object_init_field(o, &o->oShipPart3UnkF4);
-        }
-    }
-
     s16 sp1E = o->oFaceAnglePitch;
     s16 sp1C = o->oFaceAngleRoll;
     cur_obj_set_pos_to_home_with_debug();
@@ -45,20 +35,6 @@ void bhv_ship_part_3_loop(void) {
 }
 
 void bhv_jrb_sliding_box_loop(void) {
-    if (!sync_object_is_initialized(o->oSyncID)) {
-        struct SyncObject* so = sync_object_init(o, 4000.0f);
-        if (so) {
-            so->maxUpdateRate = 5.0f;
-            sync_object_init_field(o, &o->oFaceAnglePitch);
-            sync_object_init_field(o, &o->oFaceAngleRoll);
-            sync_object_init_field(o, &o->oJrbSlidingBoxUnkF8);
-            sync_object_init_field(o, &o->oJrbSlidingBoxUnkFC);
-            sync_object_init_field(o, &o->oParentRelativePosX);
-            sync_object_init_field(o, &o->oParentRelativePosY);
-            sync_object_init_field(o, &o->oParentRelativePosZ);
-        }
-    }
-
     Mat4 sp60;
     Vec3f sp54;
     Vec3f sp48;

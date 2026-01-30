@@ -121,45 +121,11 @@ void bhv_koopa_init(void) {
             obj_mark_for_deletion(o);
             return;
         }
-        struct SyncObject* so  = sync_object_init(o, SYNC_DISTANCE_ONLY_EVENTS);
-        if (so) {
-            so->on_received_post   = bhv_koopa_the_quick_on_received_post;
-            so->on_sent_pre        = bhv_koopa_the_quick_on_sent_pre;
-            so->override_ownership = bhv_koopa_the_quick_override_ownership;
-            sync_object_init_field(o, &koopaPathedStartWaypoint);
-            sync_object_init_field(o, &koopaPathedPrevWaypoint);
-            sync_object_init_field(o, &koopaShotFromCannon);
-            sync_object_init_field(o, &o->oPathedPrevWaypointFlags);
-            sync_object_init_field(o, &o->oPathedTargetPitch);
-            sync_object_init_field(o, &o->oPathedTargetYaw);
-            sync_object_init_field(o, &o->oPosX);
-            sync_object_init_field(o, &o->oPosY);
-            sync_object_init_field(o, &o->oPosZ);
-            sync_object_init_field(o, &o->oVelX);
-            sync_object_init_field(o, &o->oVelY);
-            sync_object_init_field(o, &o->oVelZ);
-            sync_object_init_field(o, &o->oAction);
-            sync_object_init_field(o, &o->oPrevAction);
-            sync_object_init_field(o, &o->oSubAction);
-            sync_object_init_field(o, &o->oTimer);
-            sync_object_init_field(o, &o->oKoopaAgility);
-            sync_object_init_field(o, &o->parentObj->oKoopaRaceEndpointRaceBegun);
-            sync_object_init_field(o, &o->parentObj->oKoopaRaceEndpointRaceStatus);
-            sync_object_init_field(o, &o->oForwardVel);
-            sync_object_init_field(o, &o->oMoveAngleYaw);
-            sync_object_init_field(o, &o->areaTimer);
-        }
+
         o->areaTimerType = AREA_TIMER_TYPE_MAXIMUM;
         o->areaTimer = 0;
         o->areaTimerDuration = 60;
         o->areaTimerRunOnceCallback = bhv_koopa_the_quick_run_once;
-    } else {
-        // normal koopa
-        sync_object_init(o, 4000.0f);
-        sync_object_init_field(o, &o->oKoopaTargetYaw);
-        sync_object_init_field(o, &o->oKoopaCountdown);
-        sync_object_init_field(o, &o->oKoopaMovementType);
-        sync_object_init_field(o, &o->oKoopaUnshelledTimeUntilTurn);
     }
 }
 
@@ -356,18 +322,6 @@ void shelled_koopa_attack_handler(s32 attackType) {
         }
 
         cur_obj_set_model(smlua_model_util_load(E_MODEL_KOOPA_WITHOUT_SHELL));
-
-        struct MarioState* marioState = nearest_mario_state_to_object(o);
-        if (marioState && marioState->playerIndex == 0) {
-            struct Object* shell = spawn_object(o, MODEL_KOOPA_SHELL, bhvKoopaShell);
-            if (shell != NULL) {
-                sync_object_set_id(shell);
-
-                struct Object* spawn_objects[] = { shell };
-                u32 models[] = { MODEL_KOOPA_SHELL };
-                network_send_spawn_objects(spawn_objects, models, 1);
-            }
-        }
 
         //! Because bob-ombs/corkboxes come after koopa in processing order,
         //  they can interact with the koopa on the same frame that this
@@ -652,8 +606,6 @@ static void koopa_the_quick_act_show_init_text(void) {
 
         o->oKoopaTurningAwayFromWall = FALSE;
         o->oFlags |= OBJ_FLAG_ACTIVE_FROM_AFAR;
-
-        network_send_object(o);
     } else if (response == 2) {
         o->oAction = KOOPA_THE_QUICK_ACT_WAIT_BEFORE_RACE;
         o->oKoopaTheQuickInitTextboxCooldown = 60;
@@ -723,10 +675,8 @@ static void koopa_the_quick_act_race(void) {
         // Hitbox is slightly larger while racing
         cur_obj_push_mario_away_from_cylinder(180.0f, 300.0f);
 
-        struct Waypoint* lastPrevWaypoint = o->oPathedPrevWaypoint;
         if (cur_obj_follow_path(0) == PATH_REACHED_END) {
             o->oAction = KOOPA_THE_QUICK_ACT_DECELERATE;
-            if (sync_object_is_owned_locally(o->oSyncID)) { network_send_object(o); }
         } else {
             downhillSteepness = 1.0f + sins((s16)(f32) o->oPathedTargetPitch);
             cur_obj_rotate_yaw_toward(o->oPathedTargetYaw, (s32)(o->oKoopaAgility * 150.0f));
@@ -798,10 +748,6 @@ static void koopa_the_quick_act_race(void) {
                     }
             }
         }
-
-        if (lastPrevWaypoint != o->oPathedPrevWaypoint) {
-            if (sync_object_is_owned_locally(o->oSyncID)) { network_send_object(o); }
-        }
     }
 }
 
@@ -815,7 +761,6 @@ static void koopa_the_quick_act_decelerate(void) {
     if (cur_obj_check_if_near_animation_end()) {
         o->oAction = KOOPA_THE_QUICK_ACT_STOP;
         o->oForwardVel = 3.0f;
-        if (sync_object_is_owned_locally(o->oSyncID)) { network_send_object(o); }
     }
 }
 
@@ -829,7 +774,6 @@ static void koopa_the_quick_act_stop(void) {
     // KOOPA_SHELLED_ACT_STOPPED at the end
     if (o->oAction == KOOPA_SHELLED_ACT_STOPPED) {
         o->oAction = KOOPA_THE_QUICK_ACT_AFTER_RACE;
-        if (sync_object_is_owned_locally(o->oSyncID)) { network_send_object(o); }
     }
 }
 

@@ -106,13 +106,6 @@ void bhv_star_spawn_init(void) {
 }
 
 void bhv_star_spawn_loop(void) {
-    if (!sync_object_is_initialized(o->oSyncID)) {
-        sync_object_init(o, 4000);
-        sync_object_init_field(o, &o->oBehParams);
-        sync_object_init_field(o, &o->oAction);
-        sync_object_init_field(o, &o->oStarSpawnExtCutsceneFlags);
-    }
-
     switch (o->oAction) {
         case 0:
             o->oFaceAngleYaw += 0x1000;
@@ -167,14 +160,6 @@ void bhv_star_spawn_loop(void) {
             if (o->oInteractStatus & INT_STATUS_INTERACTED) {
                 mark_obj_for_deletion(o);
                 o->oInteractStatus = 0;
-            }
-
-            struct SyncObject* so = sync_object_get(o->oSyncID);
-            if (so) {
-                so->owned = sync_object_should_own(so->id);
-                if (so->owned) { network_send_object(o); }
-            } else {
-                network_send_object(o);
             }
             break;
     }
@@ -316,17 +301,6 @@ void bhv_hidden_red_coin_star_init(void) {
     // and if it wasn't. You couldn't of possibly been the one
     // who last interacted to begin with.
     o->oHiddenStarLastInteractedObject = NULL;
-
-    if (!sync_object_is_initialized(o->oSyncID)) {
-        struct SyncObject *so = sync_object_init(o, SYNC_DISTANCE_ONLY_EVENTS);
-        if (so) {
-            sync_object_init_field(o, &o->oAction);
-            sync_object_init_field(o, &o->oHiddenStarTriggerCounter);
-            sync_object_init_field(o, &o->oPosX);
-            sync_object_init_field(o, &o->oPosY);
-            sync_object_init_field(o, &o->oPosZ);
-        }
-    }
 }
 
 void bhv_hidden_red_coin_star_loop(void) {

@@ -94,7 +94,6 @@ void tuxies_mother_act_1(void) {
                 spawn_default_star(starPos[0], starPos[1], starPos[2]);
 #endif
                 o->oAction = 2;
-                network_send_object(o);
             }
             break;
         case 2:
@@ -153,11 +152,6 @@ void (*sTuxiesMotherActions[])(void) = { tuxies_mother_act_0, tuxies_mother_act_
                                          tuxies_mother_act_2 };
 
 void bhv_tuxies_mother_loop(void) {
-    if (!sync_object_is_initialized(o->oSyncID)) {
-        sync_object_init(o, SYNC_DISTANCE_ONLY_EVENTS);
-        sync_object_init_field(o, &o->oAction);
-        sync_object_init_field(o, &o->oSubAction);
-    }
     o->activeFlags |= ACTIVE_FLAG_UNK10;
     cur_obj_update_floor_and_walls();
     CUR_OBJ_CALL_ACTION_FUNCTION(sTuxiesMotherActions);
@@ -299,9 +293,6 @@ void small_penguin_free_actions(void) {
 }
 
 void bhv_small_penguin_loop(void) {
-    if (!sync_object_is_initialized(o->oSyncID)) {
-        sync_object_init(o, 4000.0f);
-    }
     switch (o->oHeldState) {
         case HELD_FREE:
             small_penguin_free_actions();

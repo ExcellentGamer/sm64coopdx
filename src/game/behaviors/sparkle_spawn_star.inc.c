@@ -29,9 +29,6 @@ void bhv_spawned_star_init(void) {
     if (gNetworkAreaLoaded && spawnedFromExclamationBox) {
         o->oStarSpawnExtCutsceneFlags = 1;
         o->parentObj = o;
-        struct Object* spawn_objects[] = { o };
-        u32 models[] = { MODEL_STAR };
-        network_send_spawn_objects(spawn_objects, models, 1);
     }
     spawn_star_number();
 }
@@ -82,13 +79,6 @@ void slow_star_rotation(void) {
 }
 
 void bhv_spawned_star_loop(void) {
-    if (!sync_object_is_initialized(o->oSyncID)) {
-        sync_object_init(o, 4000);
-        sync_object_init_field(o, &o->oBehParams);
-        sync_object_init_field(o, &o->oAction);
-        sync_object_init_field(o, &o->oStarSpawnExtCutsceneFlags);
-    }
-
     if (o->oAction == 0) {
         // All of these are for checking if we spawned the star, If 
         // we didn't. We don't need the time stop.

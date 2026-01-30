@@ -29,12 +29,6 @@ void bhv_donut_platform_spawner_update(void) {
 }
 
 void bhv_donut_platform_update(void) {
-    if (!sync_object_is_initialized(o->oSyncID)) {
-        sync_object_init(o, 4000.0f);
-        sync_object_init_field(o, &o->oGravity);
-        sync_object_init_field(o, &o->oIntangibleTimer);
-    }
-
     struct Object* player = nearest_player_to_object(o);
     s32 distanceToPlayer = player ? dist_between_objects(o, player) : 10000;
 
@@ -66,7 +60,6 @@ void bhv_donut_platform_update(void) {
             o->oAction = 2;
             o->oMoveFlags = OBJ_MOVE_IN_AIR;
             create_sound_spawner(SOUND_GENERAL_DONUT_PLATFORM_EXPLOSION);
-            network_send_object(o);
         }
     } else {
         if (o->oGravity == 0.0f) {

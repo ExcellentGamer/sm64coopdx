@@ -38,25 +38,6 @@ void bhv_camera_lakitu_init(void) {
         spawn_object_relative_with_scale(CLOUD_BP_LAKITU_CLOUD, 0, 0, 0, 2.0f, o, MODEL_MIST, bhvCloud);
     }
     lakituTargetLocalIndex = UNKNOWN_LOCAL_INDEX;
-
-    if (!sync_object_is_initialized(o->oSyncID)) {
-        struct SyncObject *so = sync_object_init(o, 4000.0f);
-        if (so) {
-            so->ignore_if_true = bhv_camera_lakitu_ignore_if_true;
-            so->override_ownership = bhv_camera_lakitu_override_ownership;
-            so->on_received_post = bhv_camera_lakitu_on_received_post;
-            sync_object_init_field(o, &o->oAngleVelPitch);
-            sync_object_init_field(o, &o->oFaceAnglePitch);
-            sync_object_init_field(o, &o->oCameraLakituBlinkTimer);
-            sync_object_init_field(o, &o->oCameraLakituSpeed);
-            sync_object_init_field(o, &o->oCameraLakituCircleRadius);
-            sync_object_init_field(o, &o->oCameraLakituFinishedDialog);
-            sync_object_init_field(o, &o->oCameraLakituPitchVel);
-#ifndef VERSION_JP
-            sync_object_init_field(o, &o->oCameraLakituUnk104);
-#endif
-        }
-    }
 }
 
 static u8 camera_lakitu_intro_act_trigger_cutscene_continue_dialog(void) {

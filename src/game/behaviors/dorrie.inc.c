@@ -109,7 +109,6 @@ void dorrie_act_lower_head(void) {
                 && o->oDorrieOffsetY == -17.0f && distanceToLocalPlayer > 780.0f
                 && set_mario_npc_dialog(&gMarioStates[0], 2, dorrie_act_lower_head_continue_dialog) == 1) {
                 dorrie_begin_head_raise(TRUE);
-                network_send_object(o);
             } else if (o->oDorrieForwardDistToMario > 320.0f) {
                 o->oTimer = 0;
             }
@@ -161,20 +160,6 @@ void bhv_dorrie_update(void) {
     struct Object* player = nearest_player_to_object(o);
     s32 distanceToPlayer = player ? dist_between_objects(o, player) : 10000;
     s32 angleToPlayer = player ? obj_angle_to_object(o, player) : 0;
-
-    if (!sync_object_is_initialized(o->oSyncID)) {
-        for (s32 i = 0; i < MAX_PLAYERS; i++) { dorrieLiftingPlayer[i] = FALSE; }
-        struct SyncObject* so = sync_object_init(o, 4000.0f);
-        if (so) {
-            so->ignore_if_true = bhv_dorrie_ignore_if_true;
-            sync_object_init_field(o, &o->oDorrieOffsetY);
-            sync_object_init_field(o, &o->oDorrieVelY);
-            sync_object_init_field(o, &o->oDorrieYawVel);
-            sync_object_init_field(o, &o->oDorrieLiftingMario);
-            sync_object_init_field(o, &o->oDorrieNeckAngle);
-            sync_object_init_field(o, &o->oAngleVelYaw);
-        }
-    }
 
     f32 boundsShift;
     UNUSED s32 unused1;

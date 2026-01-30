@@ -60,7 +60,6 @@ void exclamation_box_act_2(void) {
         if (o->oExclamationBoxForce || (isNearest && cur_obj_was_attacked_or_ground_pounded())) {
             if (!o->oExclamationBoxForce) {
                 o->oExclamationBoxForce = TRUE;
-                network_send_object(o);
                 o->oExclamationBoxForce = FALSE;
             }
             cur_obj_become_intangible();
@@ -131,18 +130,6 @@ void exclamation_box_spawn_contents(struct ExclamationBoxContent *content, u8 it
             if (content->model == E_MODEL_STAR)
                 o->oFlags |= OBJ_FLAG_PERSISTENT_RESPAWN;
 
-            // send non-star spawn events
-            // stars cant be sent here due to jankiness in oBehParams
-            if (content->behavior != get_id_from_behavior(smlua_override_behavior(bhvSpawnedStar)) && spawnedObject != NULL) {
-                // hack: Sync everything
-                sync_object_set_id(spawnedObject);
-                struct SyncObject* so = sync_object_get(spawnedObject->oSyncID);
-                so->extendedModelId = content->model;
-
-                struct Object* spawn_objects[] = { spawnedObject };
-                u32 models[] = { model };
-                network_send_spawn_objects(spawn_objects, models, 1);
-            }
             break;
         }
         content++;
@@ -169,7 +156,6 @@ void exclamation_box_act_5(void) {
     o->oExclamationBoxForce = FALSE;
     if (o->oTimer > 300) {
         o->oAction = 2;
-        sync_object_forget_last_reliable_packet(o->oSyncID);
     }
 }
 void exclamation_box_act_6(void) {
@@ -184,13 +170,6 @@ void (*sExclamationBoxActions[])(void) = { exclamation_box_act_0, exclamation_bo
                                            exclamation_box_act_6 };
 
 void bhv_exclamation_box_init(void) {
-    struct SyncObject* so = sync_object_init(o, SYNC_DISTANCE_ONLY_EVENTS);
-    if (so) {
-        so->syncDeathEvent = FALSE;
-        sync_object_init_field(o, &o->oExclamationBoxForce);
-        sync_object_init_field(o, &o->areaTimer);
-    }
-
     o->areaTimerType = AREA_TIMER_TYPE_MAXIMUM;
     o->areaTimer = 0;
     o->areaTimerDuration = 300;

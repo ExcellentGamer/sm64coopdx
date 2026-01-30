@@ -70,10 +70,6 @@ static void mad_piano_act_attack(void) {
 }
 
 void bhv_mad_piano_update(void) {
-    if (!sync_object_is_initialized(o->oSyncID)) {
-        sync_object_init(o, 4000.0f);
-    }
-
     if (!(o->activeFlags & ACTIVE_FLAG_IN_DIFFERENT_ROOM)) {
         o->oFaceAngleYaw = o->oMoveAngleYaw - 0x4000;
 

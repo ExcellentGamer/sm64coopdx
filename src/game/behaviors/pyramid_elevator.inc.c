@@ -15,17 +15,6 @@ void bhv_pyramid_elevator_init(void) {
         if (ball == NULL) { continue; }
         ball->oPosY = 4600 - i * 460;
     }
-    
-    if (!sync_object_is_initialized(o->oSyncID)) {
-        struct SyncObject* so = sync_object_init(o, SYNC_DISTANCE_ONLY_EVENTS);
-        if (so) {
-            sync_object_init_field(o, &o->oPrevAction);
-            sync_object_init_field(o, &o->oAction);
-            sync_object_init_field(o, &o->oTimer);
-            sync_object_init_field(o, &o->oPosY);
-            sync_object_init_field(o, &o->oVelY);
-        }
-    }
 }
 
 void bhv_pyramid_elevator_loop(void) {
@@ -37,7 +26,6 @@ void bhv_pyramid_elevator_loop(void) {
         case PYRAMID_ELEVATOR_IDLE:
             if (cur_obj_is_any_player_on_platform()) {
                 o->oAction = PYRAMID_ELEVATOR_START_MOVING;
-                network_send_object(o);
             }
             break;
 
@@ -49,7 +37,6 @@ void bhv_pyramid_elevator_loop(void) {
             o->oPosY = o->oHomeY - sins(o->oTimer * 0x1000) * 10.0f;
             if (o->oTimer == 8) {
                 o->oAction = PYRAMID_ELEVATOR_CONSTANT_VELOCITY;
-                if (cur_obj_is_mario_on_platform()) { network_send_object(o); }
             }
             break;
 
@@ -63,7 +50,6 @@ void bhv_pyramid_elevator_loop(void) {
             if (o->oPosY < 128.0f) {
                 o->oPosY = 128.0f;
                 o->oAction = PYRAMID_ELEVATOR_END_MOVING;
-                if (cur_obj_is_mario_on_platform()) { network_send_object(o); }
             }
             break;
 
@@ -75,7 +61,6 @@ void bhv_pyramid_elevator_loop(void) {
             o->oPosY = sins(o->oTimer * 0x1000) * 10.0f + 128.0f;
             if (o->oTimer >= 8) {
                 o->oAction = PYRAMID_ELEVATOR_AT_BOTTOM;
-                network_send_object(o);
             }
             break;
         

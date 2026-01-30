@@ -135,8 +135,6 @@ void bhv_flying_bookend_loop(void) {
 }
 
 void bhv_bookend_spawn_loop(void) {
-    if (!sync_object_is_initialized(o->oSyncID)) { sync_object_init(o, SYNC_DISTANCE_ONLY_EVENTS); }
-
     struct MarioState* marioState = nearest_mario_state_to_object(o);
     if (marioState && marioState->playerIndex != 0) { return; }
 
@@ -147,10 +145,6 @@ void bhv_bookend_spawn_loop(void) {
             book = spawn_object(o, MODEL_BOOKEND, bhvFlyingBookend);
             if (book != NULL) {
                 book->oAction = 3;
-
-                struct Object* spawn_objects[] = { book };
-                u32 models[] = { MODEL_BOOKEND };
-                network_send_spawn_objects(spawn_objects, models, 1);
 
                 cur_obj_play_sound_2(SOUND_OBJ_DEFAULT_DEATH);
             }
@@ -177,16 +171,13 @@ void bookshelf_manager_act_1(void) {
     // wait until mario is near
 
     struct MarioState* marioState = nearest_mario_state_to_object(o);
-    struct SyncObject* so = sync_object_get(o->oSyncID);
     if (o->oBookSwitchManagerUnkF8 == 0) {
-        if (so && so->owned && marioState && obj_is_near_to_and_facing_mario(marioState, 500.0f, 0x3000)) {
+        if (marioState && obj_is_near_to_and_facing_mario(marioState, 500.0f, 0x3000)) {
             o->oBookSwitchManagerUnkF8 = 1;
-            network_send_object(o);
         }
-    } else if (o->oTimer > 60 && so && so->owned) {
+    } else if (o->oTimer > 60) {
         o->oAction = 2;
         o->oBookSwitchManagerUnkF8 = 0;
-        network_send_object(o);
     }
 }
 
@@ -194,31 +185,20 @@ void bookshelf_manager_act_2(void) {
     // detect if we can open, and open bookshelf if we should
 
     //if (!(o->activeFlags & ACTIVE_FLAG_IN_DIFFERENT_ROOM)) {
-        struct SyncObject* so = sync_object_get(o->oSyncID);
         if (o->oBookSwitchManagerUnkF4 < 0) {
             if (o->oTimer > 30) {
-                if (so && so->owned) {
-                    o->oBookSwitchManagerUnkF4 = o->oBookSwitchManagerUnkF8 = 0;
-                    network_send_object(o);
-                }
+                o->oBookSwitchManagerUnkF4 = o->oBookSwitchManagerUnkF8 = 0;
             } else if (o->oTimer > 10) {
-                if (so && so->owned) {
-                    o->oBookSwitchManagerUnkF8 = 1;
-                    network_send_object(o);
-                }
+                o->oBookSwitchManagerUnkF8 = 1;
             }
         } else {
             if (o->oBookSwitchManagerUnkF4 >= 3) {
                 if (o->oTimer > 100) {
-                    if (so && so->owned) {
-                        o->parentObj = cur_obj_nearest_object_with_behavior(bhvHauntedBookshelf);
-                        o->oAction = 3;
-                        network_send_object(o);
-                        if (o->parentObj != NULL) {
-                            o->parentObj->oAction = 1;
-                            o->oPosX = o->parentObj->oPosX;
-                            network_send_object(o->parentObj);
-                        }
+                    o->parentObj = cur_obj_nearest_object_with_behavior(bhvHauntedBookshelf);
+                    o->oAction = 3;
+                    if (o->parentObj != NULL) {
+                        o->parentObj->oAction = 1;
+                        o->oPosX = o->parentObj->oPosX;
                     }
                 } else if (o->oTimer == 30) {
                     play_puzzle_jingle();
@@ -237,12 +217,8 @@ void bookshelf_manager_act_3(void) {
         o->parentObj = cur_obj_nearest_object_with_behavior(bhvHauntedBookshelf);
     }
 
-    struct SyncObject* so = sync_object_get(o->oSyncID);
     if (o->oTimer > 85) {
-        if (so && so->owned) {
-            o->oAction = 4;
-            network_send_object(o);
-        }
+        o->oAction = 4;
     } else if (o->parentObj != NULL) {
         o->oForwardVel = o->parentObj->oPosX - o->oPosX;
         o->oPosX = o->parentObj->oPosX;
@@ -252,43 +228,14 @@ void bookshelf_manager_act_3(void) {
 void bookshelf_manager_act_4(void) {
     // bookshelf is done opening
 
-    struct SyncObject* so = sync_object_get(o->oSyncID);
     if (o->oBookSwitchManagerUnkF4 >= 3) {
         obj_mark_for_deletion(o);
-    } else if (so && so->owned) {
+    } else {
         o->oAction = 0;
-        network_send_object(o);
     }
-}
-
-void bhv_haunted_bookshelf_manager_override_ownership(u8* shouldOverride, u8* shouldOwn) {
-    *shouldOverride = TRUE;
-    *shouldOwn = get_network_player_smallest_global() == gNetworkPlayerLocal;
-}
-
-static u8 bhv_haunted_bookshelf_manager_ignore_if_true(void) {
-    struct SyncObject* so = sync_object_get(o->oSyncID);
-    if (!so) { return true; }
-    return so->owned;
 }
 
 void bhv_haunted_bookshelf_manager_loop(void) {
-    if (!sync_object_is_initialized(o->oSyncID)) {
-        struct SyncObject* so = sync_object_init(o, SYNC_DISTANCE_ONLY_EVENTS);
-        if (so) {
-            so->syncDeathEvent = FALSE;
-            so->override_ownership = bhv_haunted_bookshelf_manager_override_ownership;
-            so->ignore_if_true = bhv_haunted_bookshelf_manager_ignore_if_true;
-            sync_object_init_field_with_size(o, &o->activeFlags, 16);
-            sync_object_init_field(o, &o->oAction);
-            sync_object_init_field(o, &o->oBookSwitchManagerUnkF8);
-            sync_object_init_field(o, &o->oBookSwitchManagerUnkF4);
-            sync_object_init_field(o, &o->oTimer);
-            sync_object_init_field(o, &o->oPosX);
-            sync_object_init_field(o, &o->oForwardVel);
-        }
-    }
-
     switch (o->oAction) {
         case 0:
             bookshelf_manager_act_0();
@@ -309,21 +256,6 @@ void bhv_haunted_bookshelf_manager_loop(void) {
 }
 
 void bhv_book_switch_loop(void) {
-    if (!sync_object_is_initialized(o->oSyncID)) {
-        struct SyncObject* so = sync_object_init(o, SYNC_DISTANCE_ONLY_EVENTS);
-        if (so) {
-            so->override_ownership = bhv_haunted_bookshelf_manager_override_ownership;
-            so->ignore_if_true = bhv_haunted_bookshelf_manager_ignore_if_true;
-
-            sync_object_init_field(o, &o->oAction);
-            sync_object_init_field(o, &o->oBookSwitchUnkF4);
-            sync_object_init_field(o, &o->oIntangibleTimer);
-            sync_object_init_field(o, &o->oPosX);
-            sync_object_init_field(o, &o->oPosZ);
-            sync_object_init_field(o, &o->oTimer);
-        }
-    }
-
     s32 sp3C;
     struct Object* book;
     s16 sp36;
@@ -332,7 +264,6 @@ void bhv_book_switch_loop(void) {
     struct MarioState* marioState = nearest_mario_state_to_object(o);
     struct Object* player = marioState ? marioState->marioObj : NULL;
     s32 distanceToPlayer = player ? dist_between_objects(o, player) : 10000;
-    struct SyncObject* so = sync_object_get(o->oSyncID);
 
     o->header.gfx.scale[0] = 2.0f;
     o->header.gfx.scale[1] = 0.9f;
@@ -349,9 +280,8 @@ void bhv_book_switch_loop(void) {
                 cur_obj_become_intangible();
             }
 
-            if (so && so->owned && o->oAction != 1) {
+            if (o->oAction != 1) {
                 o->oAction = 1;
-                network_send_object(o);
             }
 
             if (o->oBookSwitchUnkF4 == 0.0f) {
@@ -361,9 +291,8 @@ void bhv_book_switch_loop(void) {
             if (approach_f32_ptr(&o->oBookSwitchUnkF4, 50.0f, 20.0f)) {
                 if (o->parentObj->oBookSwitchManagerUnkF4 >= 0 && o->oTimer > 60) {
                     if (sp3C == 1 || sp3C == 2 || sp3C == 6) {
-                        if (so && so->owned && o->oAction != 2) {
+                        if (o->oAction != 2) {
                             o->oAction = 2;
-                            network_send_object(o);
                         }
                     }
                 }
@@ -376,10 +305,7 @@ void bhv_book_switch_loop(void) {
                 if (o->oAction != 0) {
                     if (o->parentObj->oBookSwitchManagerUnkF4 == o->oBehParams2ndByte) {
                         play_sound(SOUND_GENERAL2_RIGHT_ANSWER, gGlobalSoundSource);
-                        if (so && so->owned) {
-                            o->parentObj->oBookSwitchManagerUnkF4 += 1;
-                            network_send_object(o->parentObj);
-                        }
+                        o->parentObj->oBookSwitchManagerUnkF4 += 1;
                     } else {
                         sp36 = random_u16() & 0x1;
                         sp34 = (marioState && player) ? player->oPosZ + 1.5f * marioState->vel[2] : 0;
@@ -389,27 +315,19 @@ void bhv_book_switch_loop(void) {
                             sp34 = 0;
                         }
 
-                        if (so && so->owned) {
-                            book = spawn_object_abs_with_rot(o, 0, MODEL_BOOKEND, bhvFlyingBookend,
-                                                             0x1FC * sp36 - 0x8CA, 890, sp34, 0,
-                                                             0x8000 * sp36 + 0x4000, 0);
-                            if (book != NULL) {
-                                book->oAction = 3;
-                                struct Object* spawn_objects[] = { book };
-                                u32 models[] = { MODEL_BOOKEND };
-                                network_send_spawn_objects(spawn_objects, models, 1);
-                            }
+                        book = spawn_object_abs_with_rot(o, 0, MODEL_BOOKEND, bhvFlyingBookend,
+                                                         0x1FC * sp36 - 0x8CA, 890, sp34, 0,
+                                                         0x8000 * sp36 + 0x4000, 0);
+
+                        if (book != NULL) {
+                            book->oAction = 3;
                         }
 
-                        if (so && so->owned) {
-                            o->parentObj->oBookSwitchManagerUnkF4 = -1;
-                            network_send_object(o->parentObj);
-                        }
+                        o->parentObj->oBookSwitchManagerUnkF4 = -1;
                     }
 
-                    if (so && so->owned && o->oAction != 0) {
+                    if (o->oAction != 0) {
                         o->oAction = 0;
-                        network_send_object(o);
                     }
                 }
             }

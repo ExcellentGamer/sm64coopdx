@@ -7,9 +7,6 @@ void bhv_tower_door_loop(void) {
         obj_explode_and_spawn_coins(80.0f, 0);
         create_sound_spawner(SOUND_GENERAL_WALL_EXPLOSION);
 
-        if (!(o->oInteractStatus & INT_STATUS_INTERACTED)) {
-            network_send_collect_item(o);
-        }
         o->oInteractStatus &= ~INT_STATUS_INTERACTED;
     }
 }

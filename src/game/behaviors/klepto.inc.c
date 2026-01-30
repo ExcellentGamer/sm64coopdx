@@ -103,28 +103,6 @@ void bhv_klepto_init(void) {
             o->oAction = KLEPTO_ACT_WAIT_FOR_MARIO;
         }
     }
-
-    struct SyncObject* so = sync_object_init(o, 4000.0f);
-    if (so) {
-        so->on_received_pre = bhv_klepto_on_received_pre;
-        so->on_received_post = bhv_klepto_on_received_post;
-        sync_object_init_field(o, &o->oAnimState);
-        sync_object_init_field(o, &o->oFlags);
-        sync_object_init_field(o, &o->oKleptoDistanceToTarget);
-        sync_object_init_field(o, &o->oKleptoUnkF8);
-        sync_object_init_field(o, &o->oKleptoUnkFC);
-        sync_object_init_field(o, &o->oKleptoSpeed);
-        sync_object_init_field(o, &o->oKleptoTimeUntilTargetChange);
-        sync_object_init_field(o, &o->oKleptoTargetNumber);
-        sync_object_init_field(o, &o->oKleptoUnk1B0);
-        sync_object_init_field(o, &o->oSoundStateID);
-        sync_object_init_field(o, &o->oHomeX);
-        sync_object_init_field(o, &o->oHomeY);
-        sync_object_init_field(o, &o->oHomeZ);
-        sync_object_init_field(o, &o->oMoveAnglePitch);
-        sync_object_init_field(o, &o->oGravity);
-        sync_object_init_field_with_size(o, &o->globalPlayerIndex, 8);
-    }
 }
 
 static void klepto_change_target(void) {
@@ -288,10 +266,9 @@ static void klepto_act_dive_at_mario(void) {
                 && marioState->action != ACT_SLEEPING
                 && !(marioState->action & (ACT_FLAG_SHORT_HITBOX | ACT_FLAG_BUTT_OR_STOMACH_SLIDE))
                 && distanceToPlayer < 200.0f && dy > 50.0f && dy < 90.0f) {
-                if (sync_object_is_owned_locally(o->oSyncID) && mario_lose_cap_to_enemy(marioState, 1) && marioState->playerIndex == 0) {
+                if (mario_lose_cap_to_enemy(marioState, 1) && marioState->playerIndex == 0) {
                     o->oAnimState = KLEPTO_ANIM_STATE_HOLDING_CAP;
                     o->globalPlayerIndex = gNetworkPlayers[marioState->playerIndex].globalIndex;
-                    network_send_object(o);
                 }
             }
         }
@@ -412,7 +389,7 @@ void bhv_klepto_update(void) {
 
             u8 kleptoHoldingCap = (o->oAnimState == KLEPTO_ANIM_STATE_HOLDING_CAP);
 
-            if (sync_object_is_owned_locally(o->oSyncID) && kleptoHoldingCap) {
+            if (kleptoHoldingCap) {
                 struct NetworkPlayer* np = network_player_from_global_index(o->globalPlayerIndex);
                 if (np == NULL) { np = gNetworkPlayerLocal; }
                 u8 modelIndex = (np->overrideModelIndex < CT_MAX) ? np->overrideModelIndex : 0;
@@ -423,10 +400,6 @@ void bhv_klepto_update(void) {
                 struct Object* cap = spawn_object(o, capModel, bhvNormalCap);
                 if (cap != NULL) {
                     cap->globalPlayerIndex = o->globalPlayerIndex;
-
-                    struct Object* spawn_objects[] = { cap };
-                    u32 models[] = { capModel };
-                    network_send_spawn_objects(spawn_objects, models, 1);
                 }
 
             } else if (o->oAnimState == KLEPTO_ANIM_STATE_HOLDING_STAR) {
@@ -440,11 +413,8 @@ void bhv_klepto_update(void) {
                 }
             }
 
-            if (sync_object_is_owned_locally(o->oSyncID)) {
-                o->oAnimState = KLEPTO_ANIM_STATE_HOLDING_NOTHING;
-                o->oAction = KLEPTO_ACT_STRUCK_BY_MARIO;
-                network_send_object(o);
-            }
+            o->oAnimState = KLEPTO_ANIM_STATE_HOLDING_NOTHING;
+            o->oAction = KLEPTO_ACT_STRUCK_BY_MARIO;
             o->oGravity = -2.0f;
 
             o->oMoveAngleYaw = angleToPlayer + 0x8000;

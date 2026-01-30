@@ -46,13 +46,6 @@ void bhv_ttc_pit_block_init(void) {
     if (gTTCSpeedSetting == TTC_SPEED_STOPPED) {
         o->oPosY += 330.0f;
     }
-
-    struct SyncObject* so = sync_object_init(o, 4000.0f);
-    if (so) {
-        so->minUpdateRate = 5.0f;
-        sync_object_init_field(o, &o->oTTCPitBlockDir);
-        sync_object_init_field(o, &o->oTTCPitBlockWaitTime);
-    }
 }
 
 /**

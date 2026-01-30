@@ -233,7 +233,6 @@ static void wiggler_act_walk(void) {
         // lower cave entrance, so don't display text.
         if ((player && player->oPosY < o->oPosY) || (cur_obj_update_dialog_with_cutscene(&gMarioStates[0], 2, 0, CUTSCENE_DIALOG, gBehaviorValues.dialogs.WigglerDialog, wiggler_act_walk_continue_dialog) != 0)) {
             o->oWigglerTextStatus = WIGGLER_TEXT_STATUS_COMPLETED_DIALOG;
-            network_send_object_reliability(o, TRUE);
         }
     } else {
         //! Every object's health is initially 2048, and wiggler's doesn't change
@@ -336,7 +335,6 @@ static void wiggler_act_jumped_on(void) {
                         o->oVelY = 70.0f;
                     }
                 }
-                network_send_object_reliability(o, TRUE);
             }
         }
     } else {
@@ -462,26 +460,6 @@ void bhv_wiggler_on_received_post(UNUSED u8 localIndex) {
  */
 void bhv_wiggler_update(void) {
     // PARTIAL_UPDATE
-    if (!sync_object_is_initialized(o->oSyncID)) {
-        struct SyncObject* so = sync_object_init(o, 4000.0f);
-        if (so) {
-            so->ignore_if_true = bhv_wiggler_ignore_if_true;
-            so->on_received_pre = bhv_wiggler_on_received_pre;
-            so->on_received_post = bhv_wiggler_on_received_post;
-            sync_object_init_field(o, &o->oFaceAnglePitch);
-            sync_object_init_field(o, &o->oWigglerFallThroughFloorsHeight);
-            sync_object_init_field(o, &o->oWigglerWalkAnimSpeed);
-            sync_object_init_field(o, &o->oWigglerSquishSpeed);
-            sync_object_init_field(o, &o->oWigglerTimeUntilRandomTurn);
-            sync_object_init_field(o, &o->oWigglerTargetYaw);
-            sync_object_init_field(o, &o->oWigglerWalkAwayFromWallTimer);
-            sync_object_init_field(o, &o->oHealth);
-            sync_object_init_field(o, &o->header.gfx.scale[0]);
-            sync_object_init_field(o, &o->header.gfx.scale[1]);
-            sync_object_init_field(o, &o->header.gfx.scale[2]);
-            sync_object_init_field(o, &o->oFaceAngleYaw);
-        }
-    }
 
     struct Object* player = nearest_player_to_object(o);
     s32 distanceToPlayer = player ? dist_between_objects(o, player) : 25000;

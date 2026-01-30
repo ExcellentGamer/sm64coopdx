@@ -22,35 +22,7 @@ void grand_star_zero_velocity(void) {
 
 void bhv_grand_star_init(void) {
     struct Object *other = cur_obj_nearest_object_with_behavior(bhvGrandStar);
-    if (other == NULL) {
-        if (!sync_object_is_initialized(o->oSyncID)) {
-            struct SyncObject *so = sync_object_init(o, 4000.0f);
-            if (so) {
-                sync_object_init_field(o, &o->header.gfx.scale[0]);
-                sync_object_init_field(o, &o->header.gfx.scale[1]);
-                sync_object_init_field(o, &o->header.gfx.scale[2]);
-                sync_object_init_field(o, &o->oPrevAction);
-                sync_object_init_field(o, &o->oAction);
-                sync_object_init_field(o, &o->oSubAction);
-                sync_object_init_field(o, &o->oInteractStatus);
-                sync_object_init_field(o, &o->oTimer);
-                sync_object_init_field(o, &o->oHomeX);
-                sync_object_init_field(o, &o->oHomeY);
-                sync_object_init_field(o, &o->oHomeZ);
-                sync_object_init_field(o, &o->oPosX);
-                sync_object_init_field(o, &o->oPosY);
-                sync_object_init_field(o, &o->oPosZ);
-                sync_object_init_field(o, &o->oGravity);
-                sync_object_init_field(o, &o->oVelY);
-                sync_object_init_field(o, &o->oForwardVel);
-                sync_object_init_field(o, &o->oAngleVelYaw);
-                sync_object_init_field(o, &o->oMoveAngleYaw);
-                sync_object_init_field(o, &o->oFaceAngleYaw);
-                sync_object_init_field(o, &o->oGraphYOffset);
-            }
-        }
-        return; 
-    }
+    if (other == NULL) return; 
     
     obj_mark_for_deletion(o);
     if (gSecondCameraFocus == o) { gSecondCameraFocus = other; }

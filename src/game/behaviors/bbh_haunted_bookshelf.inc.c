@@ -8,14 +8,6 @@
  * Update function for bhvHauntedBookshelf.
  */
 void bhv_haunted_bookshelf_loop(void) {
-    if (!sync_object_is_initialized(o->oSyncID)) {
-        sync_object_init(o, SYNC_DISTANCE_ONLY_EVENTS);
-        sync_object_init_field(o, &o->oAction);
-        sync_object_init_field(o, &o->oTimer);
-        sync_object_init_field(o, &o->oPosX);
-        sync_object_init_field(o, &o->oHauntedBookshelfShouldOpen);
-    }
-
     // oDistanceToMario is unused by this object.
     // This may have been used for revealing the books when Mario comes near,
     // but in the final game this is done by bhvHauntedBookshelfManager.

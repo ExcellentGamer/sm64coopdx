@@ -178,10 +178,6 @@ void bhv_generic_bowling_ball_spawner_init(void) {
 }
 
 void bhv_generic_bowling_ball_spawner_loop(void) {
-    if (!sync_object_is_initialized(o->oSyncID)) {
-        sync_object_init(o, SYNC_DISTANCE_ONLY_EVENTS);
-    }
-
     struct Object *bowlingBall;
 
     if (o->oTimer == 256)
@@ -198,18 +194,10 @@ void bhv_generic_bowling_ball_spawner_loop(void) {
     {
         if (is_point_within_radius_of_mario(o->oPosX, o->oPosY, o->oPosZ, o->oBBallSpawnerMaxSpawnDist)) {
             if ((s32)(random_float() * o->oBBallSpawnerSpawnOdds) == 0) {
-                if (!sync_object_is_owned_locally(o->oSyncID)) {
-                    return;
-                }
                 // this branch only runs for one player at a time
                 bowlingBall = spawn_object(o, MODEL_BOWLING_BALL, bhvBowlingBall);
                 if (bowlingBall != NULL) {
                     bowlingBall->oBehParams2ndByte = o->oBehParams2ndByte;
-
-                    // send out the bowlingBall object
-                    struct Object* spawn_objects[] = { bowlingBall };
-                    u32 models[] = { MODEL_BOWLING_BALL };
-                    network_send_spawn_objects(spawn_objects, models, 1);
                 }
             }
         }
@@ -217,10 +205,6 @@ void bhv_generic_bowling_ball_spawner_loop(void) {
 }
 
 void bhv_thi_bowling_ball_spawner_loop(void) {
-    if (!sync_object_is_initialized(o->oSyncID)) {
-        sync_object_init(o, SYNC_DISTANCE_ONLY_EVENTS);
-    }
-
     struct Object *bowlingBall;
     struct Object* player = nearest_player_to_object(o);
     if (!player) { return; }
@@ -234,16 +218,11 @@ void bhv_thi_bowling_ball_spawner_loop(void) {
 
     if ((o->oTimer % 64) == 0) {
         if (is_point_within_radius_of_mario(o->oPosX, o->oPosY, o->oPosZ, 12000)) {
-            if (sync_object_is_owned_locally(o->oSyncID) && (s32)(random_float() * 1.5) == 0) {
+            if ((s32)(random_float() * 1.5) == 0) {
                 // this branch only runs for one player at a time
                 bowlingBall = spawn_object(o, MODEL_BOWLING_BALL, bhvBowlingBall);
                 if (bowlingBall != NULL) {
                     bowlingBall->oBehParams2ndByte = o->oBehParams2ndByte;
-
-                    // send out the bowlingBall object
-                    struct Object* spawn_objects[] = { bowlingBall };
-                    u32 models[] = { MODEL_BOWLING_BALL };
-                    network_send_spawn_objects(spawn_objects, models, 1);
                 }
             }
         }
@@ -254,11 +233,6 @@ void bhv_bob_pit_bowling_ball_init(void) {
     o->oGravity = 12.0f;
     o->oFriction = 1.0f;
     o->oBuoyancy = 2.0f;
-
-    struct SyncObject* so = sync_object_init(o, 5000.0f);
-    if (so) {
-        so->maxUpdateRate = 5.0f;
-    }
 }
 
 void bhv_bob_pit_bowling_ball_loop(void) {

@@ -17,17 +17,6 @@ void bhv_lll_drawbridge_spawner_init(void) {
         drawbridge[1]->oPosZ += sins(o->oMoveAngleYaw) * -640.0f;
     }
 
-    if (!sync_object_is_initialized(o->oSyncID)) {
-        sync_object_init(o, 3000.0f);
-        for (s32 i = 0; i < 2; i++) {
-            if (drawbridge[i] == NULL) { continue; }
-            sync_object_init_field(o, &drawbridge[i]->oFaceAngleRoll);
-            sync_object_init_field(o, &drawbridge[i]->oAction);
-            sync_object_init_field(o, &drawbridge[i]->oPrevAction);
-            sync_object_init_field(o, &drawbridge[i]->oTimer);
-        }
-    }
-
     //o->activeFlags = ACTIVE_FLAG_DEACTIVATED;
 }
 

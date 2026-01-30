@@ -24,7 +24,6 @@ void cap_switch_act_1(void) {
         cur_obj_play_sound_2(SOUND_GENERAL_ACTIVATE_CAP_SWITCH);
         if (!capSwitchForcePress) {
             capSwitchForcePress = TRUE;
-            network_send_object(o);
         }
         capSwitchForcePress = FALSE;
     }
@@ -60,10 +59,5 @@ void (*sCapSwitchActions[])(void) = { cap_switch_act_0, cap_switch_act_1,
                                       cap_switch_act_2, cap_switch_act_3 };
 
 void bhv_cap_switch_loop(void) {
-    if (!sync_object_is_initialized(o->oSyncID)) {
-        sync_object_init(o, SYNC_DISTANCE_ONLY_EVENTS);
-        sync_object_init_field(o, &capSwitchForcePress);
-    }
-
     CUR_OBJ_CALL_ACTION_FUNCTION(sCapSwitchActions);
 }

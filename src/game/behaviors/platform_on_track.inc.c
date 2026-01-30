@@ -49,7 +49,6 @@ static void platform_on_track_mario_not_on_platform(void) {
         if (cur_obj_wait_then_blink(150, 40)) {
             platform_on_track_reset();
             o->header.gfx.node.flags &= ~GRAPH_RENDER_INVISIBLE;
-            if (sync_object_is_owned_locally(o->oSyncID)) { network_send_object(o); }
         }
     }
 }
@@ -70,23 +69,6 @@ static void bhv_platform_track_on_sent_pre(void) {
  * Init function for bhvPlatformOnTrack.
  */
 void bhv_platform_on_track_init(void) {
-    if (!sync_object_is_initialized(o->oSyncID)) {
-        struct SyncObject* so = sync_object_init(o, 1000.0f);
-        if (so != NULL) {
-            so->on_sent_pre = bhv_platform_track_on_sent_pre;
-            so->on_received_post = bhv_platform_track_on_received_post;
-            so->maxUpdateRate = 5.0f;
-            sync_object_init_field(o, &platformTrackPathedPrevWaypoint);
-            sync_object_init_field(o, &o->oPlatformOnTrackBaseBallIndex);
-            sync_object_init_field(o, &o->oPlatformOnTrackDistMovedSinceLastBall);
-            sync_object_init_field(o, &o->oPlatformOnTrackSkiLiftRollVel);
-            sync_object_init_field(o, &o->oPlatformOnTrackPrevWaypointFlags);
-            sync_object_init_field(o, &o->oPlatformOnTrackPitch);
-            sync_object_init_field(o, &o->oPlatformOnTrackYaw);
-            sync_object_init_field(o, &o->oPlatformOnTrackOffsetY);
-        }
-    }
-
     if (!(o->activeFlags & ACTIVE_FLAG_IN_DIFFERENT_ROOM)) {
         s16 pathIndex = (u16)(o->oBehParams >> 16) & PLATFORM_ON_TRACK_BP_MASK_PATH;
         o->oPlatformOnTrackType = ((u16)(o->oBehParams >> 16) & PLATFORM_ON_TRACK_BP_MASK_TYPE) >> 4;
@@ -150,12 +132,10 @@ static void platform_on_track_act_wait_for_mario(void) {
     if (cur_obj_is_any_player_on_platform()) {
         if (o->oTimer > 20) {
             o->oAction = PLATFORM_ON_TRACK_ACT_MOVE_ALONG_TRACK;
-            if (sync_object_is_owned_locally(o->oSyncID)) { network_send_object(o); }
         }
     } else {
         if (o->activeFlags & ACTIVE_FLAG_IN_DIFFERENT_ROOM) {
             platform_on_track_reset();
-            if (sync_object_is_owned_locally(o->oSyncID)) { network_send_object(o); }
         }
 
         o->oTimer = 0;

@@ -4,11 +4,6 @@ void bhv_sushi_shark_collision_loop(void) {
 }
 
 void bhv_sushi_shark_loop(void) {
-    if (!sync_object_is_initialized(o->oSyncID)) {
-        sync_object_init(o, 4000.0f);
-        sync_object_init_field(o, &o->oSushiSharkUnkF4);
-    }
-
     struct Object* player = nearest_player_to_object(o);
 
     f32 sp1C = find_water_level(o->oPosX, o->oPosZ);

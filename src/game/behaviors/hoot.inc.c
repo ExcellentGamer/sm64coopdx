@@ -16,14 +16,6 @@ void bhv_hoot_init(void) {
 
     cur_obj_become_intangible();
     localTalkToHoot = 0;
-
-    struct SyncObject* so = sync_object_init(o, 4000.0f);
-    if (so) {
-        so->ignore_if_true = bhv_hoot_ignore_if_true;
-        sync_object_init_field(o, &o->oHootAvailability);
-        sync_object_init_field(o, &o->oMoveAnglePitch);
-        sync_object_init_field_with_size(o, &o->header.gfx.animInfo.animFrame, 16);
-    }
 }
 
 // sp28 = arg0
@@ -295,7 +287,6 @@ void bhv_hoot_loop(void) {
                 set_mario_npc_dialog(&gMarioStates[0], 0, NULL);
                 cur_obj_become_tangible();
                 o->oHootAvailability = HOOT_AVAIL_READY_TO_FLY;
-                network_send_object(o);
             }
             break;
 

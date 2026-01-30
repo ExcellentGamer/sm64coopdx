@@ -29,16 +29,6 @@ static void bhv_boo_cage_on_received_post(UNUSED u8 localIndex) {
 }
 
 void bhv_boo_cage_init(void) {
-    struct SyncObject* so = sync_object_init(o, SYNC_DISTANCE_ONLY_EVENTS);
-    if (so == NULL) { return; }
-    so->on_received_post = bhv_boo_cage_on_received_post;
-    sync_object_init_field(o, &o->oAction);
-    sync_object_init_field(o, &o->oPosX);
-    sync_object_init_field(o, &o->oPosY);
-    sync_object_init_field(o, &o->oPosZ);
-    sync_object_init_field(o, &o->oVelX);
-    sync_object_init_field(o, &o->oVelY);
-    sync_object_init_field(o, &o->oVelZ);
 }
 
 /**
@@ -66,10 +56,6 @@ void bhv_boo_cage_loop(void) {
                 o->oVelY = 60.0f;
                 if (o->parentObj != NULL && o->parentObj->behavior == smlua_override_behavior(bhvBooWithCage)) {
                     play_puzzle_jingle();
-                }
-                struct MarioState* marioState = nearest_mario_state_to_object(o);
-                if (marioState && marioState->playerIndex == 0) {
-                    network_send_object(o);
                 }
                 o->parentObj = NULL;
             } else {
@@ -102,11 +88,6 @@ void bhv_boo_cage_loop(void) {
             if (o->oMoveFlags
                 & (OBJ_MOVE_UNDERWATER_ON_GROUND | OBJ_MOVE_AT_WATER_SURFACE | OBJ_MOVE_ON_GROUND)) {
                 o->oAction++;
-
-                struct MarioState* marioState = nearest_mario_state_to_object(o);
-                if (marioState && marioState->playerIndex == 0) {
-                    network_send_object(o);
-                }
             }
 
             break;

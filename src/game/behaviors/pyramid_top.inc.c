@@ -83,27 +83,14 @@ void bhv_pyramid_top_explode(void) {
 
     // Deactivate the pyramid top.
     o->activeFlags = ACTIVE_FLAG_DEACTIVATED;
-    // Make sure the object is set to be disabled for others.
-    network_send_object(o);
 }
 
 void bhv_pyramid_top_loop(void) {
-    if (!sync_object_is_initialized(o->oSyncID)) {
-        struct SyncObject *so = sync_object_init(o, SYNC_DISTANCE_ONLY_EVENTS);
-        if (so) {
-            sync_object_init_field_with_size(o, &o->activeFlags, 16);
-            sync_object_init_field(o, &o->oAction);
-            sync_object_init_field(o, &o->oPrevAction);
-            sync_object_init_field(o, &o->oTimer);
-        }
-    }
-    
     switch (o->oAction) {
         case PYRAMID_TOP_ACT_CHECK_IF_SOLVED:
             if (o->oPyramidTopPillarsTouched == 4) {
                 play_puzzle_jingle();
                 o->oAction = PYRAMID_TOP_ACT_SPINNING;
-                network_send_object(o);
             }
             break;
 
@@ -161,8 +148,5 @@ void bhv_pyramid_pillar_touch_detector_loop(void) {
             o->parentObj->oPyramidTopPillarsTouched++;
         }
         o->activeFlags = ACTIVE_FLAG_DEACTIVATED;
-        if (!(o->oInteractStatus & INT_STATUS_INTERACTED)) {
-            network_send_collect_item(o);
-        }
     }
 }

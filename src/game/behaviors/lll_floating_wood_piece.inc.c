@@ -1,11 +1,6 @@
 // lll_floating_wood_piece.c.inc
 
 void bhv_lll_wood_piece_loop(void) {
-    if (!sync_object_is_initialized(o->oSyncID)) {
-        sync_object_init(o, 1000.0f);
-        sync_object_init_field(o, &o->oLllWoodPieceOscillationTimer);
-    }
-
     if (o->oTimer == 0)
         o->oPosY -= 100.0f;
     o->oPosY += sins(o->oLllWoodPieceOscillationTimer) * 3.0f;

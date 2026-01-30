@@ -36,10 +36,6 @@ void grindel_thwomp_act_1(void) {
     if (o->oTimer == 0) {
         o->oThwompRandomTimer = random_float() * 30.0f + 10.0f;
     }
-    if (sync_object_is_owned_locally(o->oSyncID) && o->oTimer > o->oThwompRandomTimer) {
-        o->oAction = 2;
-        network_send_object(o);
-    }
 }
 
 void grindel_thwomp_act_0(void) {
@@ -55,13 +51,5 @@ void (*sGrindelThwompActions[])(void) = { grindel_thwomp_act_0, grindel_thwomp_a
                                           grindel_thwomp_act_4 };
 
 void bhv_grindel_thwomp_loop(void) {
-    if (!sync_object_is_initialized(o->oSyncID)) {
-        sync_object_init(o, SYNC_DISTANCE_ONLY_EVENTS);
-        sync_object_init_field(o, &o->oAction);
-        sync_object_init_field(o, &o->oPosY);
-        sync_object_init_field(o, &o->oThwompRandomTimer);
-        sync_object_init_field(o, &o->oTimer);
-        sync_object_init_field(o, &o->oVelY);
-    }
     CUR_OBJ_CALL_ACTION_FUNCTION(sGrindelThwompActions);
 }

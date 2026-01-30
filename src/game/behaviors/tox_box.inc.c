@@ -79,17 +79,6 @@ void (*sToxBoxActions[])(void) = { tox_box_act_0, tox_box_act_1, tox_box_act_2, 
                                    tox_box_act_4, tox_box_act_5, tox_box_act_6, tox_box_act_7 };
 
 void bhv_tox_box_loop(void) {
-    if (!sync_object_is_initialized(o->oSyncID)) {
-        struct SyncObject* so = sync_object_init(o, 3000.0f);
-        if (so) {
-            so->maxUpdateRate = 10.0f;
-            sync_object_init_field(o, &o->oForwardVel);
-            sync_object_init_field(o, &o->oUnkC0);
-            sync_object_init_field(o, &o->oFaceAnglePitch);
-            sync_object_init_field(o, &o->oFaceAngleRoll);
-            sync_object_init_field(o, &o->oToxBoxMovementStep);
-        }
-    }
     CUR_OBJ_CALL_ACTION_FUNCTION(sToxBoxActions);
     load_object_collision_model();
 }

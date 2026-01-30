@@ -15,7 +15,6 @@ void bhv_1up_interact(void) {
             queue_rumble_data(5, 80);
         }
 #endif
-        network_send_collect_item(o);
     }
 }
 
@@ -229,25 +228,7 @@ void bhv_1up_jump_on_approach_loop(void) {
 }
 
 void bhv_1up_hidden_loop(void) {
-    if (!sync_object_is_initialized(o->oSyncID)) {
-        sync_object_init(o, SYNC_DISTANCE_ONLY_EVENTS);
-        sync_object_init_field(o, &o->oPosX);
-        sync_object_init_field(o, &o->oPosY);
-        sync_object_init_field(o, &o->oPosZ);
-        sync_object_init_field(o, &o->oVelX);
-        sync_object_init_field(o, &o->oVelY);
-        sync_object_init_field(o, &o->oVelZ);
-        sync_object_init_field(o, &o->oAction);
-        sync_object_init_field(o, &o->oForwardVel);
-        sync_object_init_field(o, &o->o1UpHiddenUnkF4);
-        sync_object_init_field(o, &o->oIntangibleTimer);
-        sync_object_init_field_with_size(o, &o->activeFlags, 16);
-        sync_object_init_field_with_size(o, &o->header.gfx.node.flags, 16);
-    }
-
     s16 sp26;
-    s32 cacheAction = o->oAction;
-    s32 cacheActiveFlags = o->activeFlags;
     switch (o->oAction) {
         case 0:
             o->header.gfx.node.flags |= GRAPH_RENDER_INVISIBLE;
@@ -285,47 +266,21 @@ void bhv_1up_hidden_loop(void) {
             }
             break;
     }
-
-    if (cacheAction != o->oAction || cacheActiveFlags != o->activeFlags) {
-        network_send_object(o);
-    }
 }
 
 void bhv_1up_hidden_trigger_loop(void) {
-    if (!sync_object_is_initialized(o->oSyncID)) {
-        sync_object_init(o, SYNC_DISTANCE_ONLY_EVENTS);
-        sync_object_init_field_with_size(o, &o->activeFlags, 16);
-    }
-
     struct Object* player = nearest_player_to_object(o);
     if (player && player == gMarioStates[0].marioObj && obj_check_if_collided_with_object(o, player) == 1) {
         struct Object *hiddenObj = cur_obj_nearest_object_with_behavior(bhvHidden1up);
         if (hiddenObj != NULL) {
             hiddenObj->o1UpHiddenUnkF4++;
-            network_send_object(hiddenObj);
         }
         o->activeFlags = ACTIVE_FLAG_DEACTIVATED;
-       network_send_object(o);
      }
 }
 
 void bhv_1up_hidden_in_pole_loop(void) {
-    if (!sync_object_is_initialized(o->oSyncID)) {
-        sync_object_init(o, SYNC_DISTANCE_ONLY_EVENTS);
-        sync_object_init_field(o, &o->oVelX);
-        sync_object_init_field(o, &o->oVelY);
-        sync_object_init_field(o, &o->oVelZ);
-        sync_object_init_field(o, &o->oAction);
-        sync_object_init_field(o, &o->oForwardVel);
-        sync_object_init_field(o, &o->o1UpHiddenUnkF4);
-        sync_object_init_field(o, &o->oIntangibleTimer);
-        sync_object_init_field_with_size(o, &o->activeFlags, 16);
-        sync_object_init_field_with_size(o, &o->header.gfx.node.flags, 16);
-    }
-
     UNUSED s16 sp26;
-    s32 cacheAction = o->oAction;
-    s32 cacheActiveFlags = o->activeFlags;
     switch (o->oAction) {
         case 0:
             o->header.gfx.node.flags |= GRAPH_RENDER_INVISIBLE;
@@ -356,40 +311,20 @@ void bhv_1up_hidden_in_pole_loop(void) {
             }
             break;
     }
-
-    if (cacheAction != o->oAction || cacheActiveFlags != o->activeFlags) {
-        network_send_object(o);
-    }
 }
 
 void bhv_1up_hidden_in_pole_trigger_loop(void) {
-    if (!sync_object_is_initialized(o->oSyncID)) {
-        sync_object_init(o, SYNC_DISTANCE_ONLY_EVENTS);
-        sync_object_init_field_with_size(o, &o->activeFlags, 16);
-    }
-
     struct Object* player = nearest_player_to_object(o);
     if (player && player == gMarioStates[0].marioObj && obj_check_if_collided_with_object(o, player) == 1) {
         struct Object *hiddenObj = cur_obj_nearest_object_with_behavior(bhvHidden1upInPole);
         if (hiddenObj != NULL) {
             hiddenObj->o1UpHiddenUnkF4++;
-            network_send_object(hiddenObj);
         }
         o->activeFlags = ACTIVE_FLAG_DEACTIVATED;
-        network_send_object(o);
     }
 }
 
 void bhv_1up_hidden_in_pole_spawner_loop(void) {
-    if (!sync_object_is_initialized(o->oSyncID)) {
-        sync_object_init(o, SYNC_DISTANCE_ONLY_EVENTS);
-        sync_object_init_field_with_size(o, &o->activeFlags, 16);
-    }
-
-    if (gNetworkAreaSyncing || !gNetworkAreaLoaded) {
-        return;
-    }
-
     struct Object* player = nearest_player_to_object(o);
     s32 distanceToPlayer = player ? dist_between_objects(o, player) : 10000;
     if (player && player == gMarioStates[0].marioObj && distanceToPlayer < 700) {
@@ -407,12 +342,8 @@ void bhv_1up_hidden_in_pole_spawner_loop(void) {
         for (s32 i = 0; i < 3; i++) {
             if (spawn_objects[i] == NULL) { continue; }
             spawn_objects[i]->parentObj = spawn_objects[i];
-            sync_object_set_id(spawn_objects[i]);
         }
 
         o->activeFlags = ACTIVE_FLAG_DEACTIVATED;
-        network_send_object(o);
-
-        network_send_spawn_objects(spawn_objects, models, 3);
     }
 }

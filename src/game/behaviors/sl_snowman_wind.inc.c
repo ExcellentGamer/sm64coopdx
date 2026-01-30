@@ -3,16 +3,6 @@
 u8 bhv_sl_snowman_wind_loop_continue_dialog(void) { return o->oSubAction == SL_SNOWMAN_WIND_ACT_TALKING; }
 
 void bhv_sl_snowman_wind_loop(void) {
-    if (!sync_object_is_initialized(o->oSyncID)) {
-        struct SyncObject *so = sync_object_init(o, SYNC_DISTANCE_ONLY_EVENTS);
-        if (so) {
-            sync_object_init_field(o, &o->oAction);
-            sync_object_init_field(o, &o->oPrevAction);
-            sync_object_init_field(o, &o->oTimer);
-            sync_object_init_field(o, &o->oSubAction);
-        }
-    }
-
     struct Object *player = nearest_player_to_object(o);
     s32 distanceToPlayer = player ? dist_between_objects(o, player) : 10000;
     s32 angleToPlayer = player ? obj_angle_to_object(o, player) : 0;
@@ -38,7 +28,6 @@ void bhv_sl_snowman_wind_loop(void) {
     } else if (o->oSubAction == SL_SNOWMAN_WIND_ACT_TALKING) {
         if (gMarioStates[0].visibleToEnemies && cur_obj_update_dialog(&gMarioStates[0], 2, 2, gBehaviorValues.dialogs.SnowmanWindDialog, 0, bhv_sl_snowman_wind_loop_continue_dialog)) {
             o->oSubAction++;
-            network_send_object(o);
         }
         
     // Blowing, spawn wind particles (SL_SNOWMAN_WIND_ACT_BLOWING)

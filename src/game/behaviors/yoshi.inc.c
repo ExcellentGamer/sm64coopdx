@@ -21,14 +21,6 @@ void bhv_yoshi_init(void) {
         || sYoshiDead == TRUE) {
         o->activeFlags = ACTIVE_FLAG_DEACTIVATED;
     }
-
-    sync_object_init(o, 4000.0f);
-    sync_object_init_field(o, &o->oYoshiBlinkTimer);
-    sync_object_init_field(o, &o->oYoshiChosenHome);
-    sync_object_init_field(o, &o->oYoshiTargetYaw);
-    sync_object_init_field(o, &o->oHomeX);
-    sync_object_init_field(o, &o->oHomeY);
-    sync_object_init_field(o, &o->oHomeZ);
 }
 
 void yoshi_walk_loop(void) {

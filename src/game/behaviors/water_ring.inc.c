@@ -184,14 +184,6 @@ void water_ring_spawner_act_inactive(void) {
 }
 
 void bhv_jet_stream_ring_spawner_loop(void) {
-    if (!sync_object_is_initialized(o->oSyncID)) {
-        sync_object_init(o, SYNC_DISTANCE_ONLY_EVENTS);
-        sync_object_init_field(o, &o->oWaterRingSpawnerRingsCollected);
-        sync_object_init_field(o, &o->oAction);
-        sync_object_init_field(o, &o->oPrevAction);
-        sync_object_init_field(o, &o->oTimer);
-    }
-
     switch (o->oAction) {
         case JS_RING_SPAWNER_ACT_ACTIVE:
             water_ring_spawner_act_inactive();
@@ -203,7 +195,6 @@ void bhv_jet_stream_ring_spawner_loop(void) {
                 spawn_default_star(starPos[0], starPos[1], starPos[2]);
 
                 o->oAction = JS_RING_SPAWNER_ACT_INACTIVE;
-                network_send_object(o);
             }
             break;
 

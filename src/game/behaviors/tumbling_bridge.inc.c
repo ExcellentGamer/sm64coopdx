@@ -13,24 +13,6 @@ struct Struct8032F34C sTumblingBridgeParams[] = {
 };
 
 void bhv_tumbling_bridge_platform_loop(void) {
-    u8 isLLL = obj_has_behavior(o->parentObj, bhvLllTumblingBridge);
-    if (isLLL && !sync_object_is_initialized(o->oSyncID)) {
-        struct SyncObject* so = sync_object_init(o, SYNC_DISTANCE_ONLY_EVENTS);
-        if (so) {
-            sync_object_init_field_with_size(o, &o->activeFlags, 16);
-            sync_object_init_field(o, &o->oAction);
-            sync_object_init_field(o, &o->oPosX);
-            sync_object_init_field(o, &o->oPosY);
-            sync_object_init_field(o, &o->oPosZ);
-            sync_object_init_field(o, &o->oVelX);
-            sync_object_init_field(o, &o->oVelY);
-            sync_object_init_field(o, &o->oVelZ);
-            sync_object_init_field(o, &o->oFaceAnglePitch);
-            sync_object_init_field(o, &o->oFaceAngleYaw);
-            sync_object_init_field(o, &o->oFaceAngleRoll);
-        }
-    }
-
     if (o->parentObj && gCurrCourseNum == COURSE_LLL) {
         if (o->parentObj->oIntangibleTimer == -1) {
             cur_obj_hide();
@@ -45,9 +27,6 @@ void bhv_tumbling_bridge_platform_loop(void) {
             if ((o->oInteractStatus & INT_STATUS_INTERACTED) || gMarioStates[0].marioObj->platform == o) {
                 o->oAction++;
                 o->oTumblingBridgeUnkF4 = random_sign() * 0x80;
-                if (!(o->oInteractStatus & INT_STATUS_INTERACTED)) {
-                    network_send_collect_item(o);
-                }
                 o->oInteractStatus &= ~INT_STATUS_INTERACTED;
             }
             break;
@@ -68,7 +47,6 @@ void bhv_tumbling_bridge_platform_loop(void) {
             cur_obj_move_using_fvel_and_gravity();
             if (o->oPosY < o->oFloorHeight - 300.0f) {
                 o->oAction++;
-                if (isLLL) { network_send_object(o); }
             }
             break;
         case 3:
@@ -76,7 +54,6 @@ void bhv_tumbling_bridge_platform_loop(void) {
     }
     if (o->parentObj && o->parentObj->oAction == 3) {
         obj_mark_for_deletion(o);
-        if (isLLL) { network_send_object(o); }
     }
 
     if (o->parentObj && o->parentObj->oIntangibleTimer != -1) {
@@ -158,12 +135,5 @@ s16 D_8032F38C[] = { -51, 0,     0, -461, 0,   0, -512, 0,   0,    -2611, 0,
                      0,   -2360, 0, 0,    214, 0, 0,    -50, 1945, 1,     0 };
 
 void bhv_tumbling_bridge_loop(void) {
-    if (!sync_object_is_initialized(o->oSyncID)) {
-        struct SyncObject* so = sync_object_init(o, SYNC_DISTANCE_ONLY_EVENTS);
-        if (so) {
-            sync_object_init_field(o, &o->oIntangibleTimer);
-        }
-    }
-
     CUR_OBJ_CALL_ACTION_FUNCTION(sTumblingBridgeActions);
 }

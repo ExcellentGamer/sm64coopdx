@@ -24,17 +24,6 @@ void bhv_ttc_pendulum_init(void) {
     } else {
         o->oTTCPendulumAngle = 6371.5557f;
     }
-
-    struct SyncObject* so = sync_object_init(o, 4000.0f);
-    if (so) {
-        so->minUpdateRate = 5.0f;
-        sync_object_init_field(o, &o->oTTCPendulumAccelDir);
-        sync_object_init_field(o, &o->oTTCPendulumAngle);
-        sync_object_init_field(o, &o->oTTCPendulumAngleVel);
-        sync_object_init_field(o, &o->oTTCPendulumAngleAccel);
-        sync_object_init_field(o, &o->oTTCPendulumDelay);
-        sync_object_init_field(o, &o->oTTCPendulumSoundTimer);
-    }
 }
 
 /**

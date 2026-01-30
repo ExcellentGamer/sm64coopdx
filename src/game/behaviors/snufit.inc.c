@@ -107,23 +107,11 @@ void snufit_act_shoot(void) {
     if ((u16) o->oSnufitBodyScalePeriod == 0x8000 && o->oSnufitBodyBaseScale == 167) {
         o->oAction = SNUFIT_ACT_IDLE;
     } else if (o->oSnufitBullets < 3 && o->oTimer >= 3) {
-        if (sync_object_is_owned_locally(o->oSyncID)) {
-            o->oSnufitBullets += 1;
-            cur_obj_play_sound_2(SOUND_OBJ_SNUFIT_SHOOT);
-            struct Object* bullet = spawn_object_relative(0, 0, -20, 40, o, MODEL_BOWLING_BALL, bhvSnufitBalls);
-            o->oSnufitRecoil = -30;
-            o->oTimer = 0;
+        o->oSnufitBullets += 1;
+        cur_obj_play_sound_2(SOUND_OBJ_SNUFIT_SHOOT);
 
-            if (bullet != NULL) {
-                struct Object* spawn_objects[] = { bullet };
-                u32 models[] = { MODEL_BOWLING_BALL };
-                network_send_spawn_objects(spawn_objects, models, 1);
-            }
-        } else {
-            cur_obj_play_sound_2(SOUND_OBJ_SNUFIT_SHOOT);
-            o->oSnufitRecoil = -30;
-            o->oTimer = 0;
-        }
+        o->oSnufitRecoil = -30;
+        o->oTimer = 0;
     }
 }
 
@@ -132,20 +120,6 @@ void snufit_act_shoot(void) {
  * and the action brain of the object.
  */
 void bhv_snufit_loop(void) {
-    if (!sync_object_is_initialized(o->oSyncID)) {
-        sync_object_init(o, 4000.0f);
-        sync_object_init_field(o, &o->oSnufitBullets);
-        sync_object_init_field(o, &o->oSnufitRecoil);
-        sync_object_init_field(o, &o->oSnufitYOffset);
-        sync_object_init_field(o, &o->oSnufitZOffset);
-        sync_object_init_field(o, &o->oSnufitScale);
-        sync_object_init_field(o, &o->oSnufitBodyScale);
-        sync_object_init_field(o, &o->oMoveAnglePitch);
-        sync_object_init_field(o, &o->oFaceAnglePitch);
-        sync_object_init_field(o, &o->oGravity);
-        sync_object_init_field(o, &o->oDeathSound);
-    }
-
     struct MarioState* marioState = nearest_mario_state_to_object(o);
     struct Object* player = marioState ? marioState->marioObj : NULL;
     s32 distanceToPlayer = player ? dist_between_objects(o, player) : 10000;

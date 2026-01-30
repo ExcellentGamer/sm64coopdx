@@ -6,21 +6,6 @@
 // hypothesis is that the object in the middle here used to be
 // a rolling log of another variation.
 
-static void bhv_rolling_log_network_init(void) {
-    if (!sync_object_is_initialized(o->oSyncID)) {
-        struct SyncObject *so = sync_object_init(o, 4000.0f);
-        if (so) {
-            sync_object_init_field(o, &o->oAngleVelPitch);
-            sync_object_init_field(o, &o->oFaceAnglePitch);
-            sync_object_init_field(o, &o->oMoveAnglePitch);
-            sync_object_init_field(o, &o->oPitouneUnkF4);
-            sync_object_init_field(o, &o->oPitouneUnkF8);
-            sync_object_init_field(o, &o->oPitouneUnkFC);
-            sync_object_init_field(o, &o->oForwardVel);
-        }
-    }
-}
-
 void bhv_ttm_rolling_log_init(void) {
     o->oPitouneUnkF8 = 3970.0f;
     o->oPitouneUnkFC = 3654.0f;
@@ -31,7 +16,6 @@ void bhv_ttm_rolling_log_init(void) {
     o->oVelZ = 0;
     o->oFaceAnglePitch = 0;
     o->oAngleVelPitch = 0;
-    bhv_rolling_log_network_init();
 }
 
 void rolling_log_roll_log(void) {
@@ -146,15 +130,6 @@ void volcano_act_3(void) {
 }
 
 void bhv_volcano_trap_loop(void) {
-    if (!sync_object_is_initialized(o->oSyncID)) {
-        struct SyncObject *so = sync_object_init(o, 2000.0f);
-        if (so) {
-            sync_object_init_field(o, &o->oRollingLogUnkF4);
-            sync_object_init_field(o, &o->oAngleVelPitch);
-            sync_object_init_field(o, &o->oFaceAnglePitch);
-        }
-    }
-
     switch (o->oAction) {
         case 0:
             if (is_point_within_radius_of_mario(o->oPosX, o->oPosY, o->oPosZ, 1000)) {
@@ -194,5 +169,4 @@ void bhv_lll_rolling_log_init(void) {
     o->oVelZ = 0;
     o->oFaceAnglePitch = 0;
     o->oAngleVelPitch = 0;
-    bhv_rolling_log_network_init();
 }

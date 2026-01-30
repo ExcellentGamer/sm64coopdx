@@ -29,7 +29,6 @@ void breakable_box_init(void) {
             cur_obj_scale(1.5f);
             break;
     }
-    sync_object_init(o, SYNC_DISTANCE_ONLY_DEATH);
 }
 
 void hidden_breakable_box_actions(void) {

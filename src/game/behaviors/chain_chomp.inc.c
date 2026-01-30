@@ -28,15 +28,10 @@ static struct ObjectHitbox sChainChompHitbox = {
  * Update function for chain chomp part / pivot.
  */
 void bhv_chain_chomp_chain_part_update(void) {
-    if (!sync_object_is_initialized(o->oSyncID)) {
-        sync_object_init(o, SYNC_DISTANCE_ONLY_DEATH);
-    }
-
     if (!o->parentObj) { return; }
 
     if (o->parentObj->activeFlags == ACTIVE_FLAG_DEACTIVATED || o->parentObj->oAction == CHAIN_CHOMP_ACT_UNLOAD_CHAIN) {
         obj_mark_for_deletion(o);
-        network_send_object(o);
     } else if (o->oBehParams2ndByte != CHAIN_CHOMP_CHAIN_PART_BP_PIVOT) {
         struct ChainSegment *segment = (o->oBehParams2ndByte >= 0 && o->oBehParams2ndByte <= 4 && o->parentObj)
             ? &o->parentObj->oChainChompSegments[o->oBehParams2ndByte]
@@ -478,15 +473,6 @@ static void chain_chomp_act_unload_chain(void) {
  * Update function for chain chomp.
  */
 void bhv_chain_chomp_update(void) {
-    if (!sync_object_is_initialized(o->oSyncID)) {
-        struct SyncObject* so = sync_object_init(o, 1000.0f);
-        if (so) {
-            so->syncDeathEvent = FALSE;
-            sync_object_init_field(o, &o->oChainChompUnk104);
-            sync_object_init_field_with_size(o, &o->header.gfx.animInfo.animFrame, 16);
-        }
-    }
-
     switch (o->oAction) {
         case CHAIN_CHOMP_ACT_UNINITIALIZED:
             chain_chomp_act_uninitialized();
@@ -504,22 +490,11 @@ void bhv_chain_chomp_update(void) {
  * Update function for wooden post.
  */
 void bhv_wooden_post_update(void) {
-    if (!sync_object_is_initialized(o->oSyncID)) {
-        sync_object_init(o, SYNC_DISTANCE_ONLY_EVENTS);
-        sync_object_init_field(o, &o->oBehParams);
-        sync_object_init_field(o, &o->oWoodenPostMarioPounding);
-        sync_object_init_field(o, &o->oWoodenPostOffsetY);
-        sync_object_init_field(o, &o->oWoodenPostSpeedY);
-        sync_object_init_field(o, &o->oWoodenPostTotalMarioAngle);
-        sync_object_init_field(o, &o->oTimer);
-    }
-
     // When ground pounded by mario, drop by -45 + -20
     if (!o->oWoodenPostMarioPounding) {
         if ((o->oWoodenPostMarioPounding = cur_obj_is_mario_ground_pounding_platform())) {
             cur_obj_play_sound_2(SOUND_GENERAL_POUND_WOOD_POST);
             o->oWoodenPostSpeedY = -70.0f;
-            network_send_object(o);
         }
     } else if (approach_f32_ptr(&o->oWoodenPostSpeedY, 0.0f, 25.0f)) {
         // Stay still until mario is done ground pounding
@@ -529,15 +504,8 @@ void bhv_wooden_post_update(void) {
         // chomp
         o->oWoodenPostOffsetY = -190.0f;
         if (o->parentObj != o) {
-            if (gNetworkAreaSyncing) {
-                // force chain chomp cutscene ending
-                o->parentObj->oAction = CHAIN_CHOMP_ACT_UNLOAD_CHAIN;
-                o->parentObj->oChainChompReleaseStatus = CHAIN_CHOMP_RELEASED_END_CUTSCENE;
-                o->parentObj->oChainChompHitGate = TRUE;
-            } else {
-                play_puzzle_jingle();
-                o->parentObj->oChainChompReleaseStatus = CHAIN_CHOMP_RELEASED_TRIGGER_CUTSCENE;
-            }
+            play_puzzle_jingle();
+            o->parentObj->oChainChompReleaseStatus = CHAIN_CHOMP_RELEASED_TRIGGER_CUTSCENE;
             o->parentObj = o;
         }
     }
@@ -560,7 +528,6 @@ void bhv_wooden_post_update(void) {
                 obj_spawn_loot_yellow_coins(o, 5, 20.0f);
                 set_object_respawn_info_bits(o, 1);
                 o->oBehParams = WOODEN_POST_BP_NO_COINS_MASK;
-                network_send_object(o);
             }
         }
 

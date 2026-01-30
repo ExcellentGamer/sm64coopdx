@@ -7,7 +7,6 @@ void water_level_pillar_undrained(void) {
             if (cur_obj_is_mario_ground_pounding_platform()) {
                 o->oAction++;
                 spawn_mist_particles();
-                network_send_object(o);
             }
             break;
         case 1:
@@ -65,15 +64,6 @@ static u8 bhv_water_level_pillar_ignore_if_true(void) {
 void bhv_water_level_pillar_init(void) {
     if (save_file_get_flags() & SAVE_FLAG_MOAT_DRAINED)
         o->oWaterLevelPillarDrained = 1;
-
-    struct SyncObject* so = sync_object_init(o, SYNC_DISTANCE_ONLY_EVENTS);
-    if (so) {
-        so->ignore_if_true = bhv_water_level_pillar_ignore_if_true;
-        sync_object_init_field(o, &o->oAction);
-        sync_object_init_field(o, &o->oPrevAction);
-        sync_object_init_field(o, &o->oTimer);
-        sync_object_init_field(o, &o->oWaterLevelPillarDrained);
-    }
 }
 
 void bhv_water_level_pillar_loop(void) {

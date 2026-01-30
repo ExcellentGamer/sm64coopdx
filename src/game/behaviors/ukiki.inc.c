@@ -414,7 +414,6 @@ void ukiki_act_go_to_cage(void) {
 
             if (marioState && should_start_or_continue_dialog(marioState, o) && cur_obj_update_dialog_with_cutscene(&gMarioStates[0], 3, 1, CUTSCENE_DIALOG, gBehaviorValues.dialogs.UkikiCageDialog, ukiki_act_go_to_cage_continue_dialog)) {
                 o->oSubAction++;
-                network_send_object_reliability(o, TRUE);
             }
             break;
 
@@ -615,7 +614,6 @@ void cap_ukiki_held_loop(void) {
                 o->oUkikiTextState = UKIKI_TEXT_STEAL_CAP;
                 o->oUkikiHasCap |= UKIKI_CAP_ON;
                 o->globalPlayerIndex = gNetworkPlayers[heldByMario->playerIndex].globalIndex;
-                network_send_object(o);
             } else {}
             break;
 
@@ -623,7 +621,6 @@ void cap_ukiki_held_loop(void) {
             if (should_start_or_continue_dialog(heldByMario, o) && cur_obj_update_dialog(heldByMario, 2, 2, gBehaviorValues.dialogs.UkikiCapStealDialog, 0, hat_ukiki_held_loop_1)) {
                 o->oInteractionSubtype |= INT_SUBTYPE_DROP_IMMEDIATELY;
                 o->oUkikiTextState = UKIKI_TEXT_STOLE_CAP;
-                network_send_object(o);
             }
             break;
 
@@ -636,7 +633,6 @@ void cap_ukiki_held_loop(void) {
                 set_mario_npc_dialog(heldByMario, 0, NULL);
                 o->oUkikiHasCap &= ~UKIKI_CAP_ON;
                 o->oUkikiTextState = UKIKI_TEXT_GAVE_CAP_BACK;
-                network_send_object(o);
             }
             break;
 
@@ -657,13 +653,6 @@ void bhv_ukiki_init(void) {
             o->oUkikiHasCap |= UKIKI_CAP_ON;
         }
     }
-
-    sync_object_init(o, 4000.0f);
-    sync_object_init_field(o, &o->oUkikiTauntCounter);
-    sync_object_init_field(o, &o->oUkikiChaseFleeRange);
-    sync_object_init_field(o, &o->oUkikiCageSpinTimer);
-    sync_object_init_field(o, &o->oIntangibleTimer);
-    sync_object_init_field_with_size(o, &o->globalPlayerIndex, 8);
 }
 
 /**

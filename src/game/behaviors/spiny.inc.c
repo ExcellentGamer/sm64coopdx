@@ -222,48 +222,11 @@ static void spiny_act_thrown_by_lakitu(void) {
     }
 }
 
-void bhv_spiny_override_ownership(u8* shouldOverride, u8* shouldOwn) {
-    if (o->parentObj == NULL || o->parentObj->activeFlags == ACTIVE_FLAG_DEACTIVATED) { return; }
-    *shouldOverride = (o->parentObj->behavior == smlua_override_behavior(bhvEnemyLakitu));
-    *shouldOwn = sync_object_is_owned_locally(o->parentObj->oSyncID);
-}
-
 /**
  * Update function for bhvSpiny.
  */
 void bhv_spiny_update(void) {
     // PARTIAL_UPDATE
-    if (!sync_object_is_initialized(o->oSyncID)) {
-        struct SyncObject* so = sync_object_init(o, 4000.0f);
-        if (so) {
-            so->syncDeathEvent = FALSE;
-            so->on_received_post = bhv_spiny_on_received_post;
-            so->on_sent_pre = bhv_spiny_on_sent_pre;
-            so->override_ownership = bhv_spiny_override_ownership;
-
-            sync_object_init_field(o, &o->oGraphYOffset);
-            sync_object_init_field(o, &o->oFaceAngleYaw);
-            sync_object_init_field(o, &o->oSpinyTimeUntilTurn);
-            sync_object_init_field(o, &o->oSpinyTargetYaw);
-            sync_object_init_field(o, &o->oSpinyTurningAwayFromWall);
-            sync_object_init_field(o, &o->oMoveFlags);
-            sync_object_init_field(o, &o->oInteractType);
-            sync_object_init_field(o, &o->oFaceAnglePitch);
-            sync_object_init_field(o, &spinyAnimCache);
-        }
-
-
-        struct Object* lakitu = cur_obj_nearest_object_with_behavior(bhvEnemyLakitu);
-        if (lakitu != NULL) {
-            o->parentObj = lakitu;
-            if ((lakitu->oSubAction == ENEMY_LAKITU_SUB_ACT_HOLD_SPINY) && (o->oAction == SPINY_ACT_HELD_BY_LAKITU)) {
-                lakitu->prevObj = o;
-                o->oAction = SPINY_ACT_HELD_BY_LAKITU;
-                obj_init_animation_with_sound(o, (struct AnimationTable*)&spiny_egg_seg5_anims_050157E4, 0);
-            }
-        }
-    }
-
     obj_set_hitbox(o, &sSpinyHitbox);
 
     switch (o->oAction) {

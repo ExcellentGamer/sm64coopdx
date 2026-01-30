@@ -25,19 +25,6 @@ s32 update_angle_from_move_flags(INOUT s32 *angle) {
 }
 
 void bhv_scuttlebug_loop(void) {
-    if (!sync_object_is_initialized(o->oSyncID)) {
-        struct SyncObject *so = sync_object_init(o, 4000.0f);
-        if (so) {
-            sync_object_init_field(o, &o->oFlags);
-            sync_object_init_field(o, &o->oForwardVel);
-            sync_object_init_field(o, &o->oHomeX);
-            sync_object_init_field(o, &o->oHomeY);
-            sync_object_init_field(o, &o->oHomeZ);
-            sync_object_init_field(o, &o->oInteractStatus);
-            sync_object_init_field(o, &o->oScuttlebugUnkF4);
-        }
-    }
-
     struct Object *player = nearest_player_to_object(o);
 
     cur_obj_update_floor_and_walls();
@@ -131,23 +118,12 @@ void bhv_scuttlebug_loop(void) {
             obj_mark_for_deletion(o);
         if (o->activeFlags == ACTIVE_FLAG_DEACTIVATED && o->parentObj) {
             o->parentObj->oScuttlebugSpawnerUnk88 = 1;
-            network_send_object(o->parentObj);
         }
     }
     cur_obj_move_standard(-50);
 }
 
 void bhv_scuttlebug_spawn_loop(void) {
-    if (!sync_object_is_initialized(o->oSyncID)) {
-        struct SyncObject *so = sync_object_init(o, SYNC_DISTANCE_ONLY_EVENTS);
-        if (so) {
-            sync_object_init_field(o, &o->oAction);
-            sync_object_init_field(o, &o->oTimer);
-            sync_object_init_field(o, &o->oScuttlebugSpawnerUnkF4);
-            sync_object_init_field(o, &o->oScuttlebugSpawnerUnk88);
-        }
-    }
-
     struct MarioState* marioState = nearest_mario_state_to_object(o);
     if (marioState && marioState->playerIndex != 0) { return; }
 
@@ -162,20 +138,13 @@ void bhv_scuttlebug_spawn_loop(void) {
                 scuttlebug->oScuttlebugUnkF4 = o->oScuttlebugSpawnerUnkF4;
                 scuttlebug->oForwardVel = 30.0f;
                 scuttlebug->oVelY = 80.0f;
-
-                sync_object_set_id(scuttlebug);
-                struct Object *spawn_objects[] = { scuttlebug };
-                u32 models[] = { MODEL_SCUTTLEBUG };
-                network_send_spawn_objects(spawn_objects, models, 1);
             }
 
             o->oAction++;
             o->oScuttlebugUnkF4 = 1;
-            network_send_object(o);
         }
     } else if (o->oScuttlebugSpawnerUnk88 != 0) {
         o->oScuttlebugSpawnerUnk88 = 0;
         o->oAction = 0;
-        network_send_object(o);
     }
 }

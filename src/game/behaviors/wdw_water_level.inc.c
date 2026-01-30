@@ -2,26 +2,10 @@
 static u32 sWaterDiamondPicked = 0;
 
 static void bhv_init_changing_water_level_on_received_post(UNUSED u8 fromLocalIndex) {
-    struct SyncObject* diamondSo = sync_object_get(sWaterDiamondPicked);
-    if (diamondSo == NULL || diamondSo->behavior != smlua_override_behavior(bhvWaterLevelDiamond)) { return; }
-    struct Object* diamond = sync_object_get_object(sWaterDiamondPicked);
-    if (diamond == NULL || diamond->behavior != smlua_override_behavior(bhvWaterLevelDiamond)) { return; }
-
-    diamond->oAction = WATER_LEVEL_DIAMOND_ACT_CHANGE_WATER_LEVEL;
-    gWDWWaterLevelChanging = 1;
 }
 
 // called when WDW is loaded.
 void bhv_init_changing_water_level_loop(void) {
-    if (!sync_object_is_initialized(o->oSyncID)) {
-        sWaterDiamondPicked = 0;
-        struct SyncObject* so = sync_object_init(o, SYNC_DISTANCE_ONLY_EVENTS);
-        if (so != NULL) {
-            so->on_received_post = bhv_init_changing_water_level_on_received_post;
-            sync_object_init_field(o, &sWaterDiamondPicked);
-        }
-    }
-
     if (!gEnvironmentRegions) { return; }
 
     if (gCurrentObject->oAction == 0) {
@@ -42,12 +26,6 @@ void bhv_water_level_diamond_loop(void) {
     struct MarioState* marioState = nearest_mario_state_to_object(o);
     struct Object* player = marioState ? marioState->marioObj : NULL;
 
-    struct Object* manager = cur_obj_nearest_object_with_behavior(bhvInitializeChangingWaterLevel);
-
-    if (!sync_object_is_initialized(o->oSyncID)) {
-        sync_object_init(o, SYNC_DISTANCE_ONLY_EVENTS);
-    }
-
     if (gEnvironmentRegions != NULL) {
         switch (o->oAction) {
             case WATER_LEVEL_DIAMOND_ACT_INIT:
@@ -61,11 +39,6 @@ void bhv_water_level_diamond_loop(void) {
                     if (gWDWWaterLevelChanging == 0) {
                         o->oAction++; // Sets to WATER_LEVEL_DIAMOND_ACT_CHANGE_WATER_LEVEL
                         gWDWWaterLevelChanging = 1;
-
-                        if (manager != NULL && o->oSyncID != 0) {
-                            sWaterDiamondPicked = o->oSyncID;
-                            network_send_object(manager);
-                        }
                     }
                 }
                 break;
@@ -96,11 +69,6 @@ void bhv_water_level_diamond_loop(void) {
                     gWDWWaterLevelChanging = 0;
                     o->oAction = WATER_LEVEL_DIAMOND_ACT_IDLE;
                     o->oAngleVelYaw = 0;
-                    struct SyncObject* so = sync_object_get(o->oSyncID);
-                    if (so && so->behavior == o->behavior) {
-                        so->lastReliablePacketIsStale = true;
-                    }
-
                 }
                 break;
         }

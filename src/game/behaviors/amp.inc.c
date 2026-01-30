@@ -204,20 +204,6 @@ static void amp_attack_cooldown_loop(void) {
  * Homing amp update function.
  */
 void bhv_homing_amp_loop(void) {
-    if (!sync_object_is_initialized(o->oSyncID)) {
-        struct SyncObject *so = sync_object_init(o, 4000.0f);
-        if (so) {
-            sync_object_init_field(o, &o->oAmpYPhase);
-            sync_object_init_field(o, &o->oAnimState);
-            sync_object_init_field(o, &o->oFaceAnglePitch);
-            sync_object_init_field(o, &o->oFaceAngleYaw);
-            sync_object_init_field(o, &o->oForwardVel);
-            sync_object_init_field(o, &o->oFriction);
-            sync_object_init_field(o, &o->oHomingAmpAvgY);
-            sync_object_init_field(o, &o->oHomingAmpLockedOn);
-        }
-    }
-
     switch (o->oAction) {
         case HOMING_AMP_ACT_INACTIVE:
             if (is_point_within_radius_of_mario(o->oHomeX, o->oHomeY, o->oHomeZ, 800) == TRUE) {
@@ -351,18 +337,6 @@ static void circling_amp_idle_loop(void) {
  * and calls the common amp cooldown function when the amp is cooling down.
  */
 void bhv_circling_amp_loop(void) {
-    if (!sync_object_is_initialized(o->oSyncID)) {
-        struct SyncObject *so = sync_object_init(o, 4000.0f);
-        if (so) {
-            sync_object_init_field(o, &o->oAmpYPhase);
-            sync_object_init_field(o, &o->oAnimState);
-            sync_object_init_field(o, &o->oFaceAnglePitch);
-            sync_object_init_field(o, &o->oFaceAngleYaw);
-            sync_object_init_field(o, &o->oForwardVel);
-            sync_object_init_field(o, &o->oFriction);
-        }
-    }
-
     switch (o->oAction) {
         case AMP_ACT_IDLE:
             if (o->oBehParams2ndByte == AMP_BP_ROT_RADIUS_0) {

@@ -44,10 +44,6 @@ void spawn_mr_i_particle(void) {
         particle->oPosY += 50.0f * sp18;
         particle->oPosX += sins(o->oMoveAngleYaw) * 90.0f * sp18;
         particle->oPosZ += coss(o->oMoveAngleYaw) * 90.0f * sp18;
-
-        struct Object* spawn_objects[] = { particle };
-        u32 models[] = { MODEL_PURPLE_MARBLE };
-        network_send_spawn_objects(spawn_objects, models, 1);
     }
 
     cur_obj_play_sound_2(SOUND_OBJ_MRI_SHOOT);
@@ -223,7 +219,6 @@ void mr_i_act_1(void) {
         if (distanceToPlayer < 700.0f) {
             if (marioState && marioState->playerIndex == 0) {
                 o->oAction = 2;
-                network_send_object(o);
             }
         } else {
             o->oMrIUnk104++;
@@ -276,13 +271,6 @@ struct ObjectHitbox sMrIHitbox = {
 };
 
 void bhv_mr_i_loop(void) {
-    if (!sync_object_is_initialized(o->oSyncID)) {
-        struct SyncObject* so = sync_object_init(o, SYNC_DISTANCE_ONLY_EVENTS);
-        if (so) {
-            so->fullObjectSync = TRUE;
-        }
-    }
-
     struct Object* player = nearest_player_to_object(o);
     s32 distanceToPlayer = player ? dist_between_objects(o, player) : 10000;
 

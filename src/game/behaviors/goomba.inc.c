@@ -115,10 +115,6 @@ void bhv_goomba_init(void) {
     o->oDamageOrCoinValue = sGoombaProperties[o->oGoombaSize].damage;
 
     o->oGravity = -8.0f / 3.0f * o->oGoombaScale;
-
-    sync_object_init(o, 4000.0f);
-    sync_object_init_field(o, &o->oGoombaTargetYaw);
-    sync_object_init_field(o, &o->oGoombaWalkTimer);
 }
 
 /**

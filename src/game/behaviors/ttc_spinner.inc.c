@@ -17,17 +17,6 @@ static s16 sTTCSpinnerSpeeds[] = {
  * Update function for bhvTTCSpinner.
  */
 void bhv_ttc_spinner_update(void) {
-    if (!sync_object_is_initialized(o->oSyncID)) {
-        struct SyncObject* so = sync_object_init(o, 4000.0f);
-        if (so) {
-            so->minUpdateRate = 5.0f;
-            sync_object_init_field(o, &o->oAngleVelPitch);
-            sync_object_init_field(o, &o->oFaceAnglePitch);
-            sync_object_init_field(o, &o->oTTCSpinnerDir);
-            sync_object_init_field(o, &o->oTTCChangeDirTimer);
-        }
-    }
-
     o->oAngleVelPitch = sTTCSpinnerSpeeds[gTTCSpeedSetting];
 
     if (gTTCSpeedSetting == TTC_SPEED_RANDOM) {

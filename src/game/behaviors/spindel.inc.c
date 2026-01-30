@@ -4,12 +4,6 @@ void bhv_spindel_init(void) {
     o->oHomeY = o->oPosY;
     o->oSpindelUnkF4 = 0;
     o->oSpindelUnkF8 = 0;
-
-    sync_object_init(o, 4000.0f);
-    sync_object_init_field(o, &o->oSpindelUnkF4);
-    sync_object_init_field(o, &o->oSpindelUnkF8);
-    sync_object_init_field(o, &o->oAngleVelPitch);
-    sync_object_init_field(o, &o->oMoveAnglePitch);
 }
 
 void bhv_spindel_loop(void) {

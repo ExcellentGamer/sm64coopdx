@@ -84,7 +84,7 @@ void bhv_treasure_chest_bottom_loop(void) {
     struct MarioState *player = nearest_mario_state_to_object(o);
     switch (o->oAction) {
         case 0:
-            if (player && sync_object_is_owned_locally(o->parentObj->oSyncID) && obj_check_if_facing_toward_angle(o->oMoveAngleYaw, player->marioObj->header.gfx.angle[1] + 0x8000, 0x3000)) {
+            if (player && obj_check_if_facing_toward_angle(o->oMoveAngleYaw, player->marioObj->header.gfx.angle[1] + 0x8000, 0x3000)) {
                 if (is_point_within_radius_of_mario(o->oPosX, o->oPosY, o->oPosZ, 150)) {
                     if (!o->parentObj->oTreasureChestIsLastInteractionIncorrect) {
                         if (o->parentObj->oTreasureChestCurrentAnswer == o->oBehParams2ndByte) {
@@ -101,7 +101,6 @@ void bhv_treasure_chest_bottom_loop(void) {
                             o->parentObj->oTreasureChestSound = 2;
                         }
                         o->parentObj->oTreasureChestLastNetworkPlayerIndex = gNetworkPlayers[player->playerIndex].globalIndex;
-                        network_send_object(o->parentObj);
                         o->parentObj->oTreasureChestSound = 0;
                     }
                 }
@@ -133,7 +132,7 @@ struct Object* spawn_treasure_chest(s8 index, s32 x, s32 y, s32 z, s16 r) {
 }
 
 void bhv_treasure_chest_ship_init(void) {
-    struct Object *chests[4] = { 0 };
+    struct Object *chests[3] = { 0 };
     chests[0] = spawn_treasure_chest(1, 400, -350, -2700, 0);
     chests[1] = spawn_treasure_chest(2, 650, -350, -940, -0x6001);
     chests[2] = spawn_treasure_chest(3, -550, -350, -770, 0x5FFF);
@@ -149,38 +148,16 @@ void bhv_treasure_chest_ship_init(void) {
     // and if it wasn't. You couldn't of possibly been the one
     // who last interacted to begin with.
     o->oTreasureChestLastNetworkPlayerIndex = UNKNOWN_GLOBAL_INDEX;
-
-    if (!sync_object_is_initialized(o->oSyncID)) {
-        struct SyncObject *so = sync_object_init(o, SYNC_DISTANCE_ONLY_EVENTS);
-        if (so) {
-            sync_object_init_field(o, &o->oAction);
-            sync_object_init_field(o, &o->oPrevAction);
-            sync_object_init_field(o, &o->oTimer);
-            sync_object_init_field(o, &o->oTreasureChestCurrentAnswer);
-            sync_object_init_field(o, &o->oTreasureChestIsLastInteractionIncorrect);
-            sync_object_init_field(o, &o->oTreasureChestIsAboveWater);
-            sync_object_init_field(o, &o->oTreasureChestSound);
-            sync_object_init_field(o, &o->oTreasureChestLastNetworkPlayerIndex);
-            for (s32 i = 0; i < 4; i++) {
-                struct Object *chest = chests[i];
-                sync_object_init_field(o, &chest->oAction);
-                sync_object_init_field(o, &chest->oPrevAction);
-                sync_object_init_field(o, &chest->oTimer);
-                sync_object_init_field(o, &chest->oIntangibleTimer);
-            }
-        }
-    }
 }
 
 void bhv_treasure_chest_ship_loop(void) {
     switch (o->oAction) {
         case 0:
-            if (sync_object_is_owned_locally(o->oSyncID) && o->oTreasureChestCurrentAnswer == 5) {
+            if (o->oTreasureChestCurrentAnswer == 5) {
                 play_puzzle_jingle();
                 fade_volume_scale(0, 127, 1000);
                 o->oAction = 1;
                 o->oTreasureChestSound = 3;
-                network_send_object(o);
                 o->oTreasureChestSound = 0;
             }
             break;
@@ -203,7 +180,7 @@ void bhv_treasure_chest_ship_loop(void) {
 }
 
 void bhv_treasure_chest_jrb_init(void) {
-    struct Object *chests[4] = { 0 };
+    struct Object *chests[3] = { 0 };
     chests[0] = spawn_treasure_chest(1, -1700, -2812, -1150, 0x7FFF);
     chests[1] = spawn_treasure_chest(2, -1150, -2812, -1550, 0x7FFF);
     chests[2] = spawn_treasure_chest(3, -2400, -2812, -1800, 0x7FFF);
@@ -219,37 +196,15 @@ void bhv_treasure_chest_jrb_init(void) {
     // and if it wasn't. You couldn't of possibly been the one
     // who last interacted to begin with.
     o->oTreasureChestLastNetworkPlayerIndex = UNKNOWN_GLOBAL_INDEX;
-
-    if (!sync_object_is_initialized(o->oSyncID)) {
-        struct SyncObject *so = sync_object_init(o, SYNC_DISTANCE_ONLY_EVENTS);
-        if (so) {
-            sync_object_init_field(o, &o->oAction);
-            sync_object_init_field(o, &o->oPrevAction);
-            sync_object_init_field(o, &o->oTimer);
-            sync_object_init_field(o, &o->oTreasureChestCurrentAnswer);
-            sync_object_init_field(o, &o->oTreasureChestIsLastInteractionIncorrect);
-            sync_object_init_field(o, &o->oTreasureChestIsAboveWater);
-            sync_object_init_field(o, &o->oTreasureChestSound);
-            sync_object_init_field(o, &o->oTreasureChestLastNetworkPlayerIndex);
-            for (s32 i = 0; i < 4; i++) {
-                struct Object *chest = chests[i];
-                sync_object_init_field(o, &chest->oAction);
-                sync_object_init_field(o, &chest->oPrevAction);
-                sync_object_init_field(o, &chest->oTimer);
-                sync_object_init_field(o, &chest->oIntangibleTimer);
-            }
-        }
-    }
 }
 
 void bhv_treasure_chest_jrb_loop(void) {
     switch (o->oAction) {
         case 0:
-            if (sync_object_is_owned_locally(o->oSyncID) && o->oTreasureChestCurrentAnswer == 5) {
+            if (o->oTreasureChestCurrentAnswer == 5) {
                 play_puzzle_jingle();
                 o->oAction = 1;
                 o->oTreasureChestSound = 4;
-                network_send_object(o);
                 o->oTreasureChestSound = 0;
             }
             break;
@@ -257,10 +212,6 @@ void bhv_treasure_chest_jrb_loop(void) {
         case 1:
             if (o->oTimer == 60) {
                 spawn_mist_particles();
-
-                f32* starPos = gLevelValues.starPositions.TreasureJrbStarPos;
-                spawn_networked_default_star(starPos[0], starPos[1], starPos[2], o->oTreasureChestLastNetworkPlayerIndex);
-
                 o->oAction = 2;
             }
             break;
@@ -271,7 +222,7 @@ void bhv_treasure_chest_jrb_loop(void) {
 }
 
 void bhv_treasure_chest_init(void) {
-    struct Object *chests[4] = { 0 };
+    struct Object *chests[3] = { 0 };
     chests[0] = spawn_treasure_chest(1, -4500, -5119, 1300, -0x6001);
     chests[1] = spawn_treasure_chest(2, -1800, -5119, 1050, 0x1FFF);
     chests[2] = spawn_treasure_chest(3, -4500, -5119, -1100, 9102);
@@ -287,37 +238,15 @@ void bhv_treasure_chest_init(void) {
     // and if it wasn't. You couldn't of possibly been the one
     // who last interacted to begin with.
     o->oTreasureChestLastNetworkPlayerIndex = UNKNOWN_GLOBAL_INDEX;
-
-    if (!sync_object_is_initialized(o->oSyncID)) {
-        struct SyncObject *so = sync_object_init(o, SYNC_DISTANCE_ONLY_EVENTS);
-        if (so) {
-            sync_object_init_field(o, &o->oAction);
-            sync_object_init_field(o, &o->oPrevAction);
-            sync_object_init_field(o, &o->oTimer);
-            sync_object_init_field(o, &o->oTreasureChestCurrentAnswer);
-            sync_object_init_field(o, &o->oTreasureChestIsLastInteractionIncorrect);
-            sync_object_init_field(o, &o->oTreasureChestIsAboveWater);
-            sync_object_init_field(o, &o->oTreasureChestSound);
-            sync_object_init_field(o, &o->oTreasureChestLastNetworkPlayerIndex);
-            for (s32 i = 0; i < 4; i++) {
-                struct Object *chest = chests[i];
-                sync_object_init_field(o, &chest->oAction);
-                sync_object_init_field(o, &chest->oPrevAction);
-                sync_object_init_field(o, &chest->oTimer);
-                sync_object_init_field(o, &chest->oIntangibleTimer);
-            }
-        }
-    }
 }
 
 void bhv_treasure_chest_loop(void) {
     switch (o->oAction) {
         case 0:
-            if (sync_object_is_owned_locally(o->oSyncID) && o->oTreasureChestCurrentAnswer == 5) {
+            if (o->oTreasureChestCurrentAnswer == 5) {
                 play_puzzle_jingle();
                 o->oAction = 1;
                 o->oTreasureChestSound = 4;
-                network_send_object(o);
                 o->oTreasureChestSound = 0;
             }
             break;
@@ -325,10 +254,6 @@ void bhv_treasure_chest_loop(void) {
         case 1:
             if (o->oTimer == 60) {
                 spawn_mist_particles();
-
-                f32* starPos = gLevelValues.starPositions.TreasureChestStarPos;
-                spawn_networked_default_star(starPos[0], starPos[1], starPos[2], o->oTreasureChestLastNetworkPlayerIndex);
-
                 o->oAction = 2;
             }
             break;

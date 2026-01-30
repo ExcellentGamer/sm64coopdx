@@ -33,17 +33,6 @@ void bhv_ttc_rotating_solid_init(void) {
     o->oTTCRotatingSolidNumSides = o->oBehParams2ndByte == TTC_ROTATING_SOLID_BP_CUBE ? 4 : 3;
 
     o->oTTCRotatingSolidRotationDelay = gTTCRotatingSolidInitialDelays[gTTCSpeedSetting];
-
-    struct SyncObject* so = sync_object_init(o, 4000.0f);
-    if (so) {
-        so->minUpdateRate = 5.0f;
-        sync_object_init_field(o, &o->oTTCRotatingSolidNumTurns);
-        sync_object_init_field(o, &o->oTTCRotatingSolidRotationDelay);
-        sync_object_init_field(o, &o->oTTCRotatingSolidVelY);
-        sync_object_init_field(o, &o->oTTCChangeDirTimer);
-        sync_object_init_field(o, &o->oAngleVelRoll);
-        sync_object_init_field(o, &o->oFaceAngleRoll);
-    }
 }
 
 /**

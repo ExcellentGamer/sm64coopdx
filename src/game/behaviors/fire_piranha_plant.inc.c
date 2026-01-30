@@ -44,10 +44,6 @@ void bhv_fire_piranha_plant_init(void) {
         }
     }
     sNumActiveFirePiranhaPlants = sNumKilledFirePiranhaPlants = 0;
-
-    sync_object_init(o, SYNC_DISTANCE_ONLY_EVENTS);
-    sync_object_init_field(o, &sNumActiveFirePiranhaPlants);
-    sync_object_init_field(o, &sNumKilledFirePiranhaPlants);
 }
 
 static void fire_piranha_plant_act_hide(void) {
@@ -75,7 +71,6 @@ static void fire_piranha_plant_act_hide(void) {
                 if (++sNumKilledFirePiranhaPlants == 5) {
                     f32* starPos = gLevelValues.starPositions.BigPiranhasStarPos;
                     spawn_default_star(starPos[0], starPos[1], starPos[2]);
-                    network_send_object(o);
                 }
 
                 obj_die_if_health_non_positive();

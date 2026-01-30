@@ -174,20 +174,6 @@ static void fly_guy_act_shoot_fire(void) {
                 s16 fireMovePitch = marioState ? obj_turn_pitch_toward_mario(marioState, 0.0f, 0) : 0;
                 cur_obj_play_sound_2(SOUND_OBJ_FLAME_BLOWN);
                 clamp_s16(&fireMovePitch, 0x800, 0x3000);
-
-                if (sync_object_is_owned_locally(o->oSyncID)) {
-                    struct Object* fire = obj_spit_fire(
-                        /*relativePos*/ 0, 38, 20,
-                        /*scale      */ 2.5f,
-                        /*model      */ MODEL_RED_FLAME_SHADOW,
-                        /*startSpeed */ 25.0f,
-                        /*endSpeed   */ 20.0f,
-                        /*movePitch  */ fireMovePitch);
-
-                    struct Object* spawn_objects[] = { fire };
-                    u32 models[] = { MODEL_RED_FLAME_SHADOW };
-                    network_send_spawn_objects(spawn_objects, models, 1);
-                }
             }
         }
     } else {
@@ -204,16 +190,6 @@ static void fly_guy_act_shoot_fire(void) {
  */
 void bhv_fly_guy_update(void) {
     // PARTIAL_UPDATE (appears in non-roomed levels)
-
-    if (!sync_object_is_initialized(o->oSyncID)) {
-        sync_object_init(o, 4000.0f);
-        sync_object_init_field(o, &o->oFlyGuyOscTimer);
-        sync_object_init_field(o, &o->oFlyGuyLungeYDecel);
-        sync_object_init_field(o, &o->oFlyGuyLungeTargetPitch);
-        sync_object_init_field(o, &o->oFlyGuyTargetRoll);
-        sync_object_init_field(o, &o->oFlyGuyLungeTargetPitch);
-    }
-
     if (!(o->activeFlags & ACTIVE_FLAG_IN_DIFFERENT_ROOM)) {
         o->oDeathSound = SOUND_OBJ_KOOPA_FLYGUY_DEATH;
 

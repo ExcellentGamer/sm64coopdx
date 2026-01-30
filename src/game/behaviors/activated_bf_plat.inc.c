@@ -55,28 +55,12 @@ void bhv_activated_back_and_forth_platform_init(void) {
     o->oActivatedBackAndForthPlatformVertical = (u16)(o->oBehParams >> 16) & 0x0080;
 
     o->oActivatedBackAndForthPlatformStartYaw = o->oFaceAngleYaw;
-
-    sync_object_init(o, SYNC_DISTANCE_ONLY_EVENTS);
-    sync_object_init_field(o, &o->oPosX);
-    sync_object_init_field(o, &o->oPosY);
-    sync_object_init_field(o, &o->oPosZ);
-    sync_object_init_field(o, &o->oVelX);
-    sync_object_init_field(o, &o->oVelY);
-    sync_object_init_field(o, &o->oVelZ);
-    sync_object_init_field(o, &o->oActivatedBackAndForthPlatformMaxOffset);
-    sync_object_init_field(o, &o->oActivatedBackAndForthPlatformOffset);
-    sync_object_init_field(o, &o->oActivatedBackAndForthPlatformVel);
-    sync_object_init_field(o, &o->oActivatedBackAndForthPlatformCountdown);
-    sync_object_init_field(o, &o->oActivatedBackAndForthPlatformStartYaw);
-    sync_object_init_field(o, &o->oActivatedBackAndForthPlatformVertical);
-    sync_object_init_field(o, &o->oActivatedBackAndForthPlatformFlipRotation);
 }
 
 /**
  * Activated back-and-forth platform update function.
  */
 void bhv_activated_back_and_forth_platform_update(void) {
-    u8 doSendNetwork = FALSE;
     UNUSED s32 unused[3];
 
     struct MarioState* marioState = nearest_possible_mario_state_to_object(o);
@@ -135,7 +119,6 @@ void bhv_activated_back_and_forth_platform_update(void) {
         // oVelY is only negative if Mario is on the platform
         if (o->oVelY < 0.0f) {
             o->oActivatedBackAndForthPlatformVel = 10.0f;
-            doSendNetwork = TRUE;
         }
 
         // Set waiting countdown to 20 frames
@@ -164,5 +147,4 @@ void bhv_activated_back_and_forth_platform_update(void) {
 
     // Compute the object's velocity using the old saved position.
     obj_perform_position_op(POS_OP_COMPUTE_VELOCITY);
-    if (doSendNetwork) { network_send_object(o); }
 }

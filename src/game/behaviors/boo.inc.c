@@ -23,27 +23,6 @@ static u8 boo_ignore_update(void) {
     return (o->oHealth == 0);
 }
 
-struct SyncObject* boo_sync_object_init(void) {
-    struct SyncObject *so = sync_object_init(o, 4000.0f);
-    if (so == NULL) { return NULL; }
-    so->ignore_if_true = boo_ignore_update;
-    sync_object_init_field(o, &o->oBooBaseScale);
-    sync_object_init_field(o, &o->oBooNegatedAggressiveness);
-    sync_object_init_field(o, &o->oBooOscillationTimer);
-    sync_object_init_field(o, &o->oBooTargetOpacity);
-    sync_object_init_field(o, &o->oBooTurningSpeed);
-    sync_object_init_field(o, &o->oFaceAngleRoll);
-    sync_object_init_field(o, &o->oFaceAngleYaw);
-    sync_object_init_field(o, &o->oFlags);
-    sync_object_init_field(o, &o->oForwardVel);
-    sync_object_init_field(o, &o->oHealth);
-    sync_object_init_field(o, &o->oInteractStatus);
-    sync_object_init_field(o, &o->oInteractType);
-    sync_object_init_field(o, &o->oOpacity);
-    sync_object_init_field(o, &o->oRoom);
-    return so;
-}
-
 static void boo_stop(void) {
     o->oForwardVel = 0.0f;
     o->oVelY = 0.0f;
@@ -535,19 +514,6 @@ static void (*sBooActions[])(void) = {
 };
 
 void bhv_boo_loop(void) {
-    if (o->oAction < 3) {
-        if (!sync_object_is_initialized(o->oSyncID)) {
-            struct SyncObject* so = boo_sync_object_init();
-            if (so) { so->syncDeathEvent = FALSE; }
-        }
-    }
-    else {
-        if (sync_object_is_initialized(o->oSyncID)) {
-            network_send_object_reliability(o, TRUE);
-            sync_object_forget(o->oSyncID);
-        }
-    }
-
     //PARTIAL_UPDATE
 
     cur_obj_update_floor_and_walls();
@@ -752,23 +718,6 @@ void big_boo_on_forget(void) {
 }
 
 void bhv_big_boo_loop(void) {
-    if (o->oAction == 0) {
-        if (!sync_object_is_initialized(o->oSyncID)) {
-            bigBooActivated = FALSE;
-            struct SyncObject* so = boo_sync_object_init();
-            if (so) {
-                so->syncDeathEvent = FALSE;
-                so->ignore_if_true = big_boo_ignore_update;
-                so->on_forget = big_boo_on_forget;
-            }
-        }
-    } else if (o->oHealth <= 0) {
-        if (sync_object_is_initialized(o->oSyncID)) {
-            network_send_object_reliability(o, TRUE);
-            sync_object_forget(o->oSyncID);
-        }
-    }
-
     //PARTIAL_UPDATE
 
     obj_set_hitbox(o, &sBooGivingStarHitbox);
@@ -848,7 +797,6 @@ static void (*sBooWithCageActions[])(void) = {
 };
 
 void bhv_boo_with_cage_loop(void) {
-    if (!sync_object_is_initialized(o->oSyncID)) { boo_sync_object_init(); }
     //PARTIAL_UPDATE
 
     cur_obj_update_floor_and_walls();
@@ -860,12 +808,6 @@ void bhv_boo_with_cage_loop(void) {
 }
 
 void bhv_merry_go_round_boo_manager_loop(void) {
-    if (!sync_object_is_initialized(o->oSyncID)) {
-        sync_object_init(o, SYNC_DISTANCE_ONLY_EVENTS);
-        sync_object_init_field(o, &o->oAction);
-        sync_object_init_field(o, &o->oMerryGoRoundBooManagerNumBoosSpawned);
-    }
-
     struct Object* player = nearest_player_to_object(o);
     s32 distanceToPlayer = player ? dist_between_objects(o, player) : 10000;
 
@@ -875,16 +817,7 @@ void bhv_merry_go_round_boo_manager_loop(void) {
                 if (player == gMarioObjects[0] && o->oMerryGoRoundBooManagerNumBoosKilled < 5) {
                     if (o->oMerryGoRoundBooManagerNumBoosSpawned < 5) {
                         if (o->oMerryGoRoundBooManagerNumBoosSpawned - o->oMerryGoRoundBooManagerNumBoosKilled < 2) {
-                            struct Object* boo = spawn_object(o, MODEL_BOO, bhvMerryGoRoundBoo);
-                            if (boo != NULL) {
-                                sync_object_set_id(boo);
-                                struct Object* spawn_objects[] = { boo };
-                                u32 models[] = { MODEL_BOO };
-                                network_send_spawn_objects(spawn_objects, models, 1);
-                            }
-
                             o->oMerryGoRoundBooManagerNumBoosSpawned++;
-                            network_send_object(o);
                         }
                     }
 
@@ -896,15 +829,9 @@ void bhv_merry_go_round_boo_manager_loop(void) {
                         struct Object* boo = spawn_object(o, MODEL_BOO, bhvMerryGoRoundBigBoo);
                         if (boo != NULL) {
                             obj_copy_behavior_params(boo, o);
-
-                            sync_object_set_id(boo);
-                            struct Object* spawn_objects[] = { boo };
-                            u32 models[] = { MODEL_BOO };
-                            network_send_spawn_objects(spawn_objects, models, 1);
                         }
 
                         o->oAction = 2;
-                        network_send_object(o);
                     }
 #ifndef VERSION_JP
                     play_puzzle_jingle();
@@ -935,8 +862,6 @@ void bhv_animated_texture_loop(void) {
 }
 
 void bhv_boo_in_castle_loop(void) {
-    if (!sync_object_is_initialized(o->oSyncID)) { boo_sync_object_init(); }
-
     struct MarioState* marioState = nearest_mario_state_to_object(o);
     struct Object* player = marioState ? marioState->marioObj : NULL;
     s32 distanceToPlayer = player ? dist_between_objects(o, player) : 10000;

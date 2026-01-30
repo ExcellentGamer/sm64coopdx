@@ -40,16 +40,6 @@ void bhv_manta_ray_init(void) {
     }
     obj_set_hitbox(o, &sMantaRayHitbox);
     cur_obj_scale(2.5f);
-
-    sync_object_init(o, 4000.0f);
-    sync_object_init_field(o, &o->oMantaTargetPitch);
-    sync_object_init_field(o, &o->oMantaTargetYaw);
-    sync_object_init_field(o, &o->oWaterRingSpawnerRingsCollected);
-    sync_object_init_field(o, &o->oMoveAnglePitch);
-    sync_object_init_field(o, &o->oMoveAngleRoll);
-    if (ringManager != NULL) {
-        sync_object_init_field(o, &ringManager->oWaterRingMgrNextRingIndex);
-    }
 }
 
 static void manta_ray_move(void) {
@@ -89,8 +79,6 @@ static void manta_ray_act_spawn_ring(void) {
     struct Object *ringManager = o->parentObj;
     struct Object *ring;
 
-    if (!sync_object_is_owned_locally(o->oSyncID)) { return; }
-
     if (o->oTimer >= 300) {
         o->oTimer = 0;
     }
@@ -110,14 +98,6 @@ static void manta_ray_act_spawn_ring(void) {
         if (ringManager->oWaterRingMgrNextRingIndex > 10000) {
             ringManager->oWaterRingMgrNextRingIndex = 0;
         }
-        
-        if (ring != NULL) {
-            struct Object *spawn_objects[] = { ring };
-            u32 models[] = { MODEL_WATER_RING };
-            network_send_spawn_objects(spawn_objects, models, 1);
-        }
-
-        network_send_object(o);
     }
 }
 

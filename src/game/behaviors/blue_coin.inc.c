@@ -118,16 +118,6 @@ void bhv_blue_coin_switch_init(void) {
  * Update function for bhvBlueCoinSwitch.
  */
 void bhv_blue_coin_switch_loop(void) {
-    if (!sync_object_is_initialized(o->oSyncID)) {
-        sync_object_init(o, SYNC_DISTANCE_ONLY_EVENTS);
-        sync_object_init_field(o, &o->oAction);
-        sync_object_init_field(o, &o->oVelY);
-        sync_object_init_field(o, &o->oGravity);
-        sync_object_init_field(o, &o->oTimer);
-        sync_object_init_field(o, &o->oPosY);
-        sync_object_init_field(o, &o->oHomeY);
-    }
-
     // The switch's model is 1/3 size.
     cur_obj_scale(3.0f);
 
@@ -145,7 +135,6 @@ void bhv_blue_coin_switch_loop(void) {
                 o->oGravity = 0.0f;
 
                 cur_obj_play_sound_2(SOUND_GENERAL_SWITCH_DOOR_OPEN);
-                network_send_object(o);
             }
 
             // Have collision
@@ -195,7 +184,6 @@ void bhv_blue_coin_switch_loop(void) {
                     o->oVelY = 20.0f;
                     o->oGravity = 0.0f;
                     cur_obj_play_sound_2(SOUND_GENERAL_SWITCH_DOOR_OPEN);
-                    network_send_object(o);
                 } else {
                     obj_mark_for_deletion(o);
                 }

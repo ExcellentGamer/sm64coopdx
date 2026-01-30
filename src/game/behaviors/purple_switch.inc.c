@@ -7,12 +7,6 @@
  */
 
 void bhv_purple_switch_loop(void) {
-    if (!sync_object_is_initialized(o->oSyncID)) {
-        sync_object_init(o, SYNC_DISTANCE_ONLY_EVENTS);
-        sync_object_init_field(o, &o->oAction);
-        sync_object_init_field(o, &o->oTimer);
-    }
-
     u8 anyPlayerOnPlatform = FALSE;
     for (s32 i = 0; i < MAX_PLAYERS; i++) {
         if (!is_player_active(&gMarioStates[i])) { continue; }
@@ -34,7 +28,6 @@ void bhv_purple_switch_loop(void) {
             if (gMarioObject && gMarioObject->platform == o && !(gMarioStates[0].action & MARIO_UNKNOWN_13)) {
                 if (lateral_dist_between_objects(o, gMarioObject) < 127.5) {
                     o->oAction = PURPLE_SWITCH_PRESSED;
-                    network_send_object(o);
                 }
             }
             break;
@@ -79,7 +72,6 @@ void bhv_purple_switch_loop(void) {
             cur_obj_scale_over_time(2, 3, 0.2f, 1.5f);
             if (o->oTimer == 3) {
                 o->oAction = PURPLE_SWITCH_IDLE;
-                network_send_object(o);
             }
             break;
         /**

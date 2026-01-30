@@ -134,12 +134,6 @@ static void enemy_lakitu_sub_act_no_spiny(void) {
                 o->oEnemyLakituNumSpinies += 1;
                 o->oSubAction = ENEMY_LAKITU_SUB_ACT_HOLD_SPINY;
                 o->oEnemyLakituSpinyCooldown = 30;
-                network_send_object(o);
-
-                sync_object_set_id(spiny);
-                struct Object* spawn_objects[] = { spiny };
-                u32 models[] = { MODEL_SPINY_BALL };
-                network_send_spawn_objects(spawn_objects, models, 1);
             }
         }
     }
@@ -243,13 +237,6 @@ static void enemy_lakitu_act_main(void) {
  */
 void bhv_enemy_lakitu_update(void) {
     // PARTIAL_UPDATE
-    if (!sync_object_is_initialized(o->oSyncID)) {
-        sync_object_init(o, 4000.0f);
-        sync_object_init_field(o, &o->oEnemyLakituBlinkTimer);
-        sync_object_init_field(o, &o->oEnemyLakituSpinyCooldown);
-        sync_object_init_field(o, &o->oEnemyLakituFaceForwardCountdown);
-    }
-
     treat_far_home_as_mario(2000.0f, NULL, NULL);
 
     switch (o->oAction) {

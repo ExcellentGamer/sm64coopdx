@@ -35,8 +35,6 @@ void elevator_act_0(void) {
             o->oAction = 1;
         }
     }
-
-    if (marioState && marioState->playerIndex == 0 && o->oAction != 0) { network_send_object(o); }
 }
 
 void elevator_act_1(void) {
@@ -59,8 +57,6 @@ void elevator_act_1(void) {
             o->oAction = 3;
         }
     }
-
-    if (marioState && marioState->playerIndex == 0 && o->oAction != 1) { network_send_object(o); }
 }
 
 void elevator_act_2(void) { // Pretty similar code to action 1
@@ -86,8 +82,6 @@ void elevator_act_2(void) { // Pretty similar code to action 1
             o->oAction = 3;
         }
     }
-
-    if (marioState && marioState->playerIndex == 0 && o->oAction != 2) { network_send_object(o); }
 }
 
 void elevator_act_4(void) {
@@ -101,8 +95,6 @@ void elevator_act_4(void) {
     if (marioState && !mario_is_in_air_action(marioState) && !cur_obj_is_any_player_on_platform()) {
         o->oAction = 1;
     }
-
-    if (marioState && marioState->playerIndex == 0 && o->oAction != 4) { network_send_object(o); }
 }
 
 void elevator_act_3(void) // nearly identical to action 2
@@ -117,8 +109,6 @@ void elevator_act_3(void) // nearly identical to action 2
     if (marioState && !mario_is_in_air_action(marioState) && !cur_obj_is_any_player_on_platform()) {
         o->oAction = 0;
     }
-
-    if (marioState && marioState->playerIndex == 0 && o->oAction != 3) { network_send_object(o); }
 }
 
 void bhv_elevator_init(void) {
@@ -134,11 +124,6 @@ void bhv_elevator_init(void) {
         o->oElevatorUnkFC = (o->oElevatorUnkF4 + o->oElevatorUnkF8) / 2;
         o->oElevatorUnk100 = 2;
     }
-
-    sync_object_init(o, SYNC_DISTANCE_ONLY_EVENTS);
-    sync_object_init_field(o, &o->oAction);
-    sync_object_init_field(o, &o->oPosY);
-    sync_object_init_field(o, &o->oVelY);
 }
 
 void (*sElevatorActions[])(void) = { elevator_act_0, elevator_act_1, elevator_act_2, elevator_act_3,

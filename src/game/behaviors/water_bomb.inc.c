@@ -29,16 +29,6 @@ static struct ObjectHitbox sWaterBombHitbox = {
  * Spawn water bombs targeting mario when he comes in range.
  */
 void bhv_water_bomb_spawner_update(void) {
-    if (!sync_object_is_initialized(o->oSyncID)) {
-        struct SyncObject* so = sync_object_init(o, SYNC_DISTANCE_ONLY_EVENTS);
-        if (so) {
-            so->fullObjectSync = TRUE;
-            so->maxUpdateRate = 5.0f;
-            sync_object_init_field(o, &o->oWaterBombSpawnerBombActive);
-            sync_object_init_field(o, &o->oWaterBombSpawnerTimeToSpawn);
-        }
-    }
-
     f32 latDistToMario = 9999;
     f32 spawnerRadius;
     struct MarioState* marioState = NULL;
@@ -62,7 +52,7 @@ void bhv_water_bomb_spawner_update(void) {
     if (!o->oWaterBombSpawnerBombActive && latDistToMario < spawnerRadius && player->oPosY - o->oPosY < 1000.0f) {
         if (o->oWaterBombSpawnerTimeToSpawn != 0) {
             o->oWaterBombSpawnerTimeToSpawn -= 1;
-        } else if (sync_object_is_owned_locally(o->oSyncID)) {
+        } else {
             // this branch only runs for one player at a time
 
             struct Object *waterBomb = spawn_object_relative(0, 0, 2000, 0, o, MODEL_WATER_BOMB, bhvWaterBomb);
@@ -76,26 +66,8 @@ void bhv_water_bomb_spawner_update(void) {
                 waterBomb->oPosX = player->oPosX + waterBombDistToMario * sins(player->oMoveAngleYaw);
                 waterBomb->oPosZ = player->oPosZ + waterBombDistToMario * coss(player->oMoveAngleYaw);
 
-                struct Object *waterBombShadow = spawn_object(waterBomb, MODEL_WATER_BOMB_SHADOW, bhvWaterBombShadow);
-
                 o->oWaterBombSpawnerBombActive = TRUE;
                 o->oWaterBombSpawnerTimeToSpawn = random_linear_offset(0, 50);
-
-                // update the spawner
-                network_send_object(o);
-
-                if (waterBombShadow != NULL) {
-                    // send out the waterBomb objects
-                    struct Object* spawn_objects[] = {
-                        waterBomb,
-                        waterBombShadow
-                    };
-                    u32 models[] = {
-                        MODEL_WATER_BOMB,
-                        MODEL_WATER_BOMB_SHADOW
-                    };
-                    network_send_spawn_objects(spawn_objects, models, 2);
-                }
             }
         }
     }

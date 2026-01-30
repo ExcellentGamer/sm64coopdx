@@ -26,7 +26,6 @@ void piranha_plant_act_idle(void) {
     s32 distanceToPlayer = player ? dist_between_objects(o, player) : 10000;
     if (distanceToPlayer < 1200.0f) {
         o->oAction = PIRANHA_PLANT_ACT_SLEEPING;
-        if (sync_object_is_owned_locally(o->oSyncID)) { network_send_object(o); }
     }
 }
 
@@ -97,7 +96,6 @@ void piranha_plant_act_sleeping(void) {
     if (distanceToPlayer < 400.0f) {
         if (mario_moving_fast_enough_to_make_piranha_plant_bite()) {
             o->oAction = PIRANHA_PLANT_ACT_WOKEN_UP;
-            if (sync_object_is_owned_locally(o->oSyncID)) { network_send_object(o); }
         }
     } else if (distanceToLocalPlayer < 1000.0f) {
         play_secondary_music(SEQ_EVENT_PIRANHA_PLANT, 0, 255, 1000);
@@ -129,7 +127,6 @@ void piranha_plant_act_woken_up(void) {
     if (piranha_plant_check_interactions() == 0) {
         if (o->oTimer > 10) {
             o->oAction = PIRANHA_PLANT_ACT_BITING;
-            if (sync_object_is_owned_locally(o->oSyncID)) { network_send_object(o); }
         }
     }
 }
@@ -167,7 +164,6 @@ void piranha_plant_attacked(void) {
     o->oInteractStatus = 0;
     if (cur_obj_check_if_near_animation_end()) {
         o->oAction = PIRANHA_PLANT_ACT_SHRINK_AND_DIE;
-        if (sync_object_is_owned_locally(o->oSyncID)) { network_send_object(o); }
     }
 #if BUGFIX_PIRANHA_PLANT_STATE_RESET
     piranha_plant_reset_when_far(); // see this function's comment
@@ -197,7 +193,6 @@ void piranha_plant_act_shrink_and_die(void) {
         o->oPiranhaPlantScale = 0.0f;
         cur_obj_spawn_loot_blue_coin();
         o->oAction = PIRANHA_PLANT_ACT_WAIT_TO_RESPAWN;
-        if (sync_object_is_owned_locally(o->oSyncID)) { network_send_object(o); }
     }
 
     cur_obj_scale(o->oPiranhaPlantScale);
@@ -215,7 +210,6 @@ void piranha_plant_act_wait_to_respawn(void) {
     s32 distanceToPlayer = player ? dist_between_objects(o, player) : 10000;
     if (distanceToPlayer > 1200.0f) {
         o->oAction = PIRANHA_PLANT_ACT_RESPAWN;
-        if (sync_object_is_owned_locally(o->oSyncID)) { network_send_object(o); }
     }
 }
 
@@ -361,17 +355,6 @@ void (*TablePiranhaPlantActions[])(void) = {
  * Main loop for bhvPiranhaPlant.
  */
 void bhv_piranha_plant_loop(void) {
-    if (!sync_object_is_initialized(o->oSyncID)) {
-        sync_object_init(o, 2000.0f);
-        sync_object_init_field(o, &o->oAction);
-        sync_object_init_field(o, &o->oInteractStatus);
-        sync_object_init_field(o, &o->oInteractType);
-        sync_object_init_field(o, &o->oMoveAngleYaw);
-        sync_object_init_field(o, &o->oPiranhaPlantScale);
-        sync_object_init_field(o, &o->oPiranhaPlantSleepMusicState);
-        sync_object_init_field(o, &o->oTimer);
-    }
-
     CUR_OBJ_CALL_ACTION_FUNCTION(TablePiranhaPlantActions);
     // In WF, hide all Piranha Plants once high enough up.
     if (gCurrLevelNum == LEVEL_WF) {

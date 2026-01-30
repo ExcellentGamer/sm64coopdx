@@ -19,18 +19,6 @@ void bhv_hidden_star_init(void) {
     // and if it wasn't. You couldn't of possibly been the one
     // who last interacted to begin with.
     o->oHiddenStarLastInteractedObject = NULL;
-    
-    if (!sync_object_is_initialized(o->oSyncID)) {
-        struct SyncObject *so = sync_object_init(o, SYNC_DISTANCE_ONLY_EVENTS);
-        if (so) {
-            sync_object_init_field(o, &o->oAction);
-            sync_object_init_field(o, &o->oHiddenStarTriggerCounter);
-            sync_object_init_field(o, &o->oPosX);
-            sync_object_init_field(o, &o->oPosY);
-            sync_object_init_field(o, &o->oPosZ);
-            sync_object_init_field(o, &o->oTimer);
-        }
-    }
 }
 
 void bhv_hidden_star_loop(void) {
@@ -86,11 +74,7 @@ void bhv_hidden_star_trigger_loop(void) {
             }
 #endif
         }
-
         o->activeFlags = ACTIVE_FLAG_DEACTIVATED;
-        if (!(o->oInteractStatus & INT_STATUS_INTERACTED)) {
-            network_send_collect_item(o);
-        }
     }
     if (gLevelValues.visibleSecrets) {
         obj_set_model(o, MODEL_PURPLE_MARBLE);

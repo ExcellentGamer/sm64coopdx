@@ -33,16 +33,6 @@ void bhv_ttc_moving_bar_init(void) {
     o->oTTCMovingBarStoppedTimer = 10 * o->oBehParams2ndByte;
 
     o->oMoveAngleYaw = 0x4000 - o->oMoveAngleYaw;
-
-    struct SyncObject* so = sync_object_init(o, 4000.0f);
-    if (so) {
-        so->minUpdateRate = 5.0f;
-        sync_object_init_field(o, &o->oTTCMovingBarDelay);
-        sync_object_init_field(o, &o->oTTCMovingBarStoppedTimer);
-        sync_object_init_field(o, &o->oTTCMovingBarOffset);
-        sync_object_init_field(o, &o->oTTCMovingBarSpeed);
-        sync_object_init_field(o, &o->oTTCMovingBarStartOffset);
-    }
 }
 
 /**

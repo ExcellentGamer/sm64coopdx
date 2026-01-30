@@ -30,13 +30,6 @@ void bhv_moneybag_init(void) {
     o->oBuoyancy = 2.0f;
     cur_obj_init_animation(0);
     o->oOpacity = 0;
-
-    sync_object_init(o, 4000.0f);
-    sync_object_init_field(o, &o->oHomeX);
-    sync_object_init_field(o, &o->oHomeY);
-    sync_object_init_field(o, &o->oHomeZ);
-    sync_object_init_field(o, &o->oMoneybagJumpState);
-    sync_object_init_field(o, &o->oOpacity);
 }
 
 void moneybag_check_mario_collision(void) {
@@ -226,32 +219,13 @@ void bhv_moneybag_loop(void) {
 void bhv_moneybag_hidden_loop(void) {
     obj_set_hitbox(o, &sMoneybagHiddenHitbox);
 
-    if (!sync_object_is_initialized(o->oSyncID)) {
-        sync_object_init(o, SYNC_DISTANCE_ONLY_EVENTS);
-        sync_object_init_field(o, &o->oAction);
-        sync_object_init_field(o, &o->oPrevAction);
-        sync_object_init_field(o, &o->oTimer);
-    }
-
     switch (o->oAction) {
         case FAKE_MONEYBAG_COIN_ACT_IDLE:
             if (is_point_within_radius_of_mario(o->oPosX, o->oPosY, o->oPosZ, 400)) {
-                if (sync_object_is_owned_locally(o->oSyncID)) {
-                    struct Object* moneyBag = spawn_object(o, MODEL_MONEYBAG, bhvMoneybag);
 #ifndef VERSION_JP
-                    cur_obj_play_sound_2(SOUND_GENERAL_VANISH_SFX);
+                cur_obj_play_sound_2(SOUND_GENERAL_VANISH_SFX);
 #endif
-                    o->oAction = FAKE_MONEYBAG_COIN_ACT_TRANSFORM;
-
-                    network_send_object(o);
-
-                    if (moneyBag != NULL) {
-                        sync_object_set_id(moneyBag);
-                        struct Object* spawn_objects[] = { moneyBag };
-                        u32 models[] = { MODEL_MONEYBAG };
-                        network_send_spawn_objects(spawn_objects, models, 1);
-                    }
-                }
+                o->oAction = FAKE_MONEYBAG_COIN_ACT_TRANSFORM;
             }
             break;
 

@@ -8,12 +8,6 @@ void bhv_squarish_path_parent_init(void) {
     o->oPosX += radius;
     o->oPosZ += radius;
 
-    struct SyncObject* so = sync_object_init(o, 2000.0f);
-    if (so) {
-        so->hasStandardFields = FALSE;
-        so->maxUpdateRate = 5.0f;
-    }
-
     for (s32 i = 0; i < 2; i++) {
         s16 action = (i == 0) ? 1 : 3;
         s16 offset = (i == 0) ? (-radius) : (radius);
@@ -23,17 +17,6 @@ void bhv_squarish_path_parent_init(void) {
         square->oPosY = o->oPosY;
         square->oPosZ = o->oPosZ + offset;
         square->oAction = action;
-        sync_object_init_field(o, &square->oMoveAngleYaw);
-        sync_object_init_field(o, &square->oForwardVel);
-        sync_object_init_field(o, &square->oPosX);
-        sync_object_init_field(o, &square->oPosY);
-        sync_object_init_field(o, &square->oPosZ);
-        sync_object_init_field(o, &square->oVelX);
-        sync_object_init_field(o, &square->oVelY);
-        sync_object_init_field(o, &square->oVelZ);
-        sync_object_init_field(o, &square->oAction);
-        sync_object_init_field(o, &square->oPrevAction);
-        sync_object_init_field(o, &square->oTimer);
     }
 }
 

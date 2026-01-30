@@ -19,7 +19,6 @@ void bhv_bobomb_init(void) {
     o->oFriction = 0.8;
     o->oBuoyancy = 1.3;
     o->oInteractionSubtype = INT_SUBTYPE_KICKABLE;
-    sync_object_init(o, 4000.0f);
 }
 
 void bobomb_spawn_coin(void) {
@@ -297,13 +296,6 @@ void bhv_bobomb_buddy_init(void) {
     o->oFriction = 0.8;
     o->oBuoyancy = 1.3;
     o->oInteractionSubtype = INT_SUBTYPE_NPC;
-
-    if (o->oBobombBuddyRole == BOBOMB_BUDDY_ROLE_CANNON) {
-        sync_object_init(o, SYNC_DISTANCE_ONLY_EVENTS);
-        sync_object_init_field(o, &o->oBobombBuddyHasTalkedToMario);
-        sync_object_init_field(o, &o->oBobombBuddyCannonStatus);
-        sync_object_init_field(o, &forceCannonOpen);
-    }
 }
 
 void bobomb_buddy_act_idle(void) {
@@ -348,7 +340,6 @@ void bobomb_buddy_cannon_dialog(s32 dialogFirstText, s32 dialogSecondText) {
                 save_file_set_cannon_unlocked();
 
                 forceCannonOpen = TRUE;
-                network_send_object(o);
                 forceCannonOpen = FALSE;
 
                 cannonClosed = cur_obj_nearest_object_with_behavior(bhvCannonClosed);
@@ -383,7 +374,6 @@ void bobomb_buddy_cannon_dialog(s32 dialogFirstText, s32 dialogSecondText) {
             o->oInteractStatus = 0;
             o->oAction = BOBOMB_BUDDY_ACT_IDLE;
             o->oBobombBuddyCannonStatus = BOBOMB_BUDDY_CANNON_OPENED;
-            network_send_object(o);
             break;
     }
 }

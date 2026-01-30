@@ -171,20 +171,6 @@ void bhv_monty_mole_init(void) {
     o->oMontyMoleHoleX = 0;
     o->oMontyMoleHoleY = 0;
     o->oMontyMoleHoleZ = 0;
-
-    struct SyncObject* so = sync_object_init(o, 4000.0f);
-    if (so) {
-        so->on_received_post = bhv_monty_mole_on_received_post;
-        sync_object_init_field(o, &o->oMontyMoleHeightRelativeToFloor);
-        sync_object_init_field(o, &o->oMontyMoleHoleX);
-        sync_object_init_field(o, &o->oMontyMoleHoleY);
-        sync_object_init_field(o, &o->oMontyMoleHoleZ);
-        sync_object_init_field(o, &o->oFaceAnglePitch);
-        sync_object_init_field(o, &o->oGravity);
-        sync_object_init_field(o, &o->oIntangibleTimer);
-        sync_object_init_field(o, &o->oFaceAnglePitch);
-        sync_object_init_field_with_size(o, &o->header.gfx.node.flags, 16);
-    }
 }
 
 /**
@@ -192,7 +178,6 @@ void bhv_monty_mole_init(void) {
  * either the rise from hole or jump out of hole action.
  */
 static void monty_mole_act_select_hole(void) {
-    u8 networkOwns = sync_object_is_owned_locally(o->oSyncID);
     struct MarioState* marioState = nearest_mario_state_to_object(o);
 
     f32 minDistToMario;
@@ -244,8 +229,6 @@ static void monty_mole_act_select_hole(void) {
 
         cur_obj_unhide();
         cur_obj_become_tangible();
-
-        if (networkOwns) { network_send_object(o); }
     }
 }
 
@@ -278,13 +261,7 @@ static void monty_mole_act_spawn_rock(void) {
     if (cur_obj_init_anim_and_check_if_end(2)) {
         if (o->oBehParams2ndByte != MONTY_MOLE_BP_NO_ROCK
             && abs_angle_diff(angleToPlayer, o->oMoveAngleYaw) < 0x4000
-            && sync_object_is_owned_locally(o->oSyncID)
-            && (rock = spawn_object(o, MODEL_PEBBLE, bhvMontyMoleRock)) != NULL) {
-
-            struct Object* spawn_objects[] = { rock };
-            u32 models[] = { MODEL_PEBBLE };
-            network_send_spawn_objects(spawn_objects, models, 1);
-
+           && (rock = spawn_object(o, MODEL_PEBBLE, bhvMontyMoleRock)) != NULL) {
             o->prevObj = rock;
             o->oAction = MONTY_MOLE_ACT_THROW_ROCK;
         } else {
@@ -460,14 +437,8 @@ void bhv_monty_mole_update(void) {
             //  1500 units away from each other, so the counter resets if you
             //  attack moles in these holes consecutively.
             if (distToLastKill < 1500.0f) {
-                if (sMontyMoleKillStreak == 7 && sync_object_is_owned_locally(o->oSyncID)) {
+                if (sMontyMoleKillStreak == 7) {
                     play_puzzle_jingle();
-                    struct Object* oneUp = spawn_object(o, MODEL_1UP, bhv1upWalking);
-                    if (oneUp != NULL) {
-                        struct Object* spawn_objects[] = { oneUp };
-                        u32 models[] = { MODEL_1UP };
-                        network_send_spawn_objects(spawn_objects, models, 1);
-                    }
                 }
             } else {
                 sMontyMoleKillStreak = 0;

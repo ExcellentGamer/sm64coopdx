@@ -12,18 +12,10 @@ void bhv_wf_solid_tower_platform_loop(void) {
 }
 
 void bhv_wf_elevator_tower_platform_loop(void) {
-    if (!sync_object_is_initialized(o->oSyncID)) {
-        sync_object_init(o, SYNC_DISTANCE_ONLY_EVENTS);
-        sync_object_init_field(o, &o->oAction);
-        sync_object_init_field(o, &o->oPosY);
-        sync_object_init_field(o, &o->oTimer);
-    }
-
     switch (o->oAction) {
         case 0:
             if (gMarioObject && gMarioObject->platform == o) {
                 o->oAction++;
-                network_send_object(o);
             }
             break;
         case 1:

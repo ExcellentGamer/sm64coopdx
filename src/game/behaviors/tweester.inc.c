@@ -139,15 +139,6 @@ void (*sTweesterActions[])(void) = { tweester_act_idle, tweester_act_chase, twee
  * Loads the hitbox and calls its relevant action.
  */
 void bhv_tweester_loop(void) {
-    if (!sync_object_is_initialized(o->oSyncID)) {
-        sync_object_init(o, 4000.0f);
-        sync_object_init_field(o, &o->oForwardVel);
-        sync_object_init_field(o, &o->oTweesterScaleTimer);
-        sync_object_init_field(o, &o->header.gfx.scale[0]);
-        sync_object_init_field(o, &o->header.gfx.scale[1]);
-        sync_object_init_field(o, &o->header.gfx.scale[2]);
-    }
-
     obj_set_hitbox(o, &sTweesterHitbox);
     CUR_OBJ_CALL_ACTION_FUNCTION(sTweesterActions);
     o->oInteractStatus = 0;

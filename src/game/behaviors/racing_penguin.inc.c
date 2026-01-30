@@ -24,11 +24,6 @@ static void bhv_racing_penguin_the_quick_on_sent_pre(void) {
     penguinPathedPrevWaypoint  = ((void*)o->oPathedPrevWaypoint - path) / sizeof(struct Waypoint*);
 }
 
-void bhv_racing_penguin_the_quick_override_ownership(u8* shouldOverride, u8* shouldOwn) {
-    *shouldOverride = TRUE;
-    *shouldOwn = (get_network_player_smallest_global() == gNetworkPlayerLocal);
-}
-
 void bhv_racing_penguin_run_once(void) {
     cur_obj_align_gfx_with_floor();
     if (BHV_ARR_CHECK(sRacingPenguinData, o->oBehParams2ndByte, struct RacingPenguinData)) {
@@ -51,33 +46,6 @@ void bhv_racing_penguin_init(void) {
     struct Object* objShortcutCheck = cur_obj_nearest_object_with_behavior(bhvPenguinRaceShortcutCheck);
     if (objShortcutCheck) { objShortcutCheck->parentObj = o; }
 
-    struct SyncObject* so  = sync_object_init(o, SYNC_DISTANCE_ONLY_EVENTS);
-    if (so) {
-        so->on_received_post   = bhv_racing_penguin_the_quick_on_received_post;
-        so->on_sent_pre        = bhv_racing_penguin_the_quick_on_sent_pre;
-        so->override_ownership = bhv_racing_penguin_the_quick_override_ownership;
-        sync_object_init_field(o, &penguinPathedStartWaypoint);
-        sync_object_init_field(o, &penguinPathedPrevWaypoint);
-        sync_object_init_field(o, &o->oPathedPrevWaypointFlags);
-        sync_object_init_field(o, &o->oPathedTargetPitch);
-        sync_object_init_field(o, &o->oPathedTargetYaw);
-        sync_object_init_field(o, &o->oPosX);
-        sync_object_init_field(o, &o->oPosY);
-        sync_object_init_field(o, &o->oPosZ);
-        sync_object_init_field(o, &o->oVelX);
-        sync_object_init_field(o, &o->oVelY);
-        sync_object_init_field(o, &o->oVelZ);
-        sync_object_init_field(o, &o->oAction);
-        sync_object_init_field(o, &o->oPrevAction);
-        sync_object_init_field(o, &o->oSubAction);
-        sync_object_init_field(o, &o->oTimer);
-        sync_object_init_field(o, &o->oForwardVel);
-        sync_object_init_field(o, &o->oMoveAngleYaw);
-        sync_object_init_field(o, &o->oRacingPenguinWeightedNewTargetSpeed);
-        sync_object_init_field(o, &o->oRacingPenguinMarioWon);
-        sync_object_init_field(o, &o->oRacingPenguinReachedBottom);
-        sync_object_init_field(o, &o->areaTimer);
-    }
     o->areaTimerType = AREA_TIMER_TYPE_MAXIMUM;
     o->areaTimer = 0;
     o->areaTimerDuration = 60;
@@ -115,8 +83,6 @@ static void racing_penguin_act_show_init_text(void) {
 
         o->oAction = RACING_PENGUIN_ACT_PREPARE_FOR_RACE;
         o->oVelY = 60.0f;
-
-        network_send_object(o);
     } else if (response == 2) {
         o->oAction = RACING_PENGUIN_ACT_WAIT_FOR_MARIO;
         o->oRacingPenguinInitTextCooldown = 60;
@@ -127,7 +93,6 @@ static void racing_penguin_act_prepare_for_race(void) {
     if (obj_begin_race(TRUE)) {
         o->oAction = RACING_PENGUIN_ACT_RACE;
         o->oForwardVel = 20.0f;
-        if (sync_object_is_owned_locally(o->oSyncID)) { network_send_object(o); }
     }
 
     cur_obj_rotate_yaw_toward(0x4000, 2500);
@@ -150,11 +115,9 @@ static void racing_penguin_act_race(void) {
         o->oPathedPrevWaypointFlags = 0;
     }
 
-    struct Waypoint* lastPrevWaypoint = o->oPathedPrevWaypoint;
     if (cur_obj_follow_path(0) == PATH_REACHED_END) {
         o->oRacingPenguinReachedBottom = TRUE;
         o->oAction = RACING_PENGUIN_ACT_FINISH_RACE;
-        if (sync_object_is_owned_locally(o->oSyncID)) { network_send_object(o); }
     } else {
         struct Object* player = nearest_player_to_object(o);
         targetSpeed = player ? (o->oPosY - player->oPosY) : o->oPosY;
@@ -201,10 +164,6 @@ static void racing_penguin_act_race(void) {
     } else {
         o->oTimer = 0;
     }*/
-
-    if (lastPrevWaypoint != o->oPathedPrevWaypoint) {
-        if (sync_object_is_owned_locally(o->oSyncID)) { network_send_object(o); }
-    }
 }
 
 static void racing_penguin_act_finish_race(void) {
@@ -264,7 +223,6 @@ static void racing_penguin_act_show_final_text(void) {
         cur_obj_spawn_star_at_y_offset(starPos[0], starPos[1], starPos[2], 200.0f);
 #endif
         o->oRacingPenguinMarioWon = FALSE;
-        if (sync_object_is_owned_locally(o->oSyncID)) { network_send_object(o); }
     }
 }
 
@@ -306,7 +264,6 @@ void bhv_penguin_race_finish_line_update(void) {
         || (player && distanceToPlayer < 1000.0f && player->oPosZ - o->oPosZ < 0.0f)) {
         if (!o->parentObj->oRacingPenguinReachedBottom && !o->parentObj->oRacingPenguinMarioWon) {
             o->parentObj->oRacingPenguinMarioWon = TRUE;
-            network_send_object(o->parentObj);
         }
     }
 }
@@ -316,6 +273,5 @@ void bhv_penguin_race_shortcut_check_update(void) {
     s32 distanceToPlayer = player ? dist_between_objects(o, player) : 10000;
     if (distanceToPlayer < 500.0f && o->parentObj && !o->parentObj->oRacingPenguinMarioCheated) {
         o->parentObj->oRacingPenguinMarioCheated = TRUE;
-        network_send_object(o->parentObj);
     }
 }

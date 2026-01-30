@@ -36,7 +36,6 @@ void whomp_act_0(void) {
             }
         } else if (marioState && should_start_or_continue_dialog(marioState, o) && cur_obj_update_dialog_with_cutscene(&gMarioStates[0], 2, 1, CUTSCENE_DIALOG, gBehaviorValues.dialogs.KingWhompDialog, whomp_act_0_continue_dialog)) {
             o->oAction = 2;
-            network_send_object(o);
         }
     } else if (distanceToPlayer < 500.0f)
         o->oAction = 1;
@@ -251,7 +250,6 @@ void whomp_act_8(void) {
 
             cur_obj_play_sound_2(SOUND_OBJ_KING_WHOMP_DEATH);
             o->oAction = 9;
-            network_send_object(o);
         }
     } else {
         spawn_mist_particles_variable(0, 0, 100.0f);
@@ -274,15 +272,6 @@ void (*sWhompActions[])(void) = {
 
 // MM
 void bhv_whomp_loop(void) {
-    if (!sync_object_is_initialized(o->oSyncID)) {
-        sync_object_init(o, 4000.0f);
-        sync_object_init_field(o, &o->oAngleVelPitch);
-        sync_object_init_field(o, &o->oFaceAnglePitch);
-        sync_object_init_field(o, &o->oForwardVel);
-        sync_object_init_field(o, &o->oHealth);
-        sync_object_init_field(o, &o->oFaceAnglePitch);
-    }
-
     cur_obj_update_floor_and_walls();
     CUR_OBJ_CALL_ACTION_FUNCTION(sWhompActions);
     cur_obj_move_standard(-20);

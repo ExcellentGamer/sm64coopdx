@@ -223,7 +223,6 @@ void king_bobomb_act_7(void) {
     u8 updateDialog = (marioState && should_start_or_continue_dialog(marioState, o)) || (gMarioStates[0].pos[1] >= o->oPosY - 100.0f);
     if (updateDialog && cur_obj_update_dialog_with_cutscene(&gMarioStates[0], 2, 2, CUTSCENE_DIALOG, gBehaviorValues.dialogs.KingBobombDefeatDialog, king_bobomb_act_7_continue_dialog)) {
         o->oAction = 8;
-        network_send_object(o);
     }
 }
 
@@ -386,18 +385,6 @@ u8 bhv_king_bobomb_ignore_if_true(void) {
 }
 
 void bhv_king_bobomb_loop(void) {
-    if (!sync_object_is_initialized(o->oSyncID)) {
-        struct SyncObject* so = sync_object_init(o, 4000.0f);
-        if (so) {
-            so->override_ownership = bhv_king_bobomb_override_ownership;
-            so->ignore_if_true = bhv_king_bobomb_ignore_if_true;
-            sync_object_init_field(o, &o->oKingBobombUnk88);
-            sync_object_init_field(o, &o->oFlags);
-            sync_object_init_field(o, &o->oHealth);
-            sync_object_init_field(o, &o->oInteractStatus);
-        }
-    }
-
     f32 sp34 = 20.0f;
     f32 sp30 = 50.0f;
     UNUSED u8 pad[8];

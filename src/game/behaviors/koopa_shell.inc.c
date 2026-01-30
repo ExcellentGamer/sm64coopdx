@@ -57,10 +57,6 @@ void koopa_shell_spawn_sparkles(f32 a) {
 }
 
 void bhv_koopa_shell_loop(void) {
-    if (!sync_object_is_initialized(o->oSyncID)) {
-        sync_object_init(o, 500.0f);
-    }
-
     struct Surface *sp34;
     obj_set_hitbox(o, &sKoopaShellHitbox);
     cur_obj_scale(1.0f);
