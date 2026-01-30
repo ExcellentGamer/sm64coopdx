@@ -77,18 +77,6 @@ static void klepto_anim_dive(void) {
     obj_face_pitch_approach(0, 1000);
 }
 
-static s32 kleptoCachedAnimState = 0;
-
-static void bhv_klepto_on_received_pre(UNUSED u8 localIndex) {
-    kleptoCachedAnimState = o->oAnimState;
-}
-
-static void bhv_klepto_on_received_post(UNUSED u8 localIndex) {
-    if (kleptoCachedAnimState == KLEPTO_ANIM_STATE_HOLDING_NOTHING && o->oAnimState == KLEPTO_ANIM_STATE_HOLDING_STAR) {
-        o->oAnimState = KLEPTO_ANIM_STATE_HOLDING_NOTHING;
-    }
-}
-
 void bhv_klepto_init(void) {
     if (o->oBehParams2ndByte != 0) {
         o->oAnimState = KLEPTO_ANIM_STATE_HOLDING_STAR;
@@ -266,9 +254,9 @@ static void klepto_act_dive_at_mario(void) {
                 && marioState->action != ACT_SLEEPING
                 && !(marioState->action & (ACT_FLAG_SHORT_HITBOX | ACT_FLAG_BUTT_OR_STOMACH_SLIDE))
                 && distanceToPlayer < 200.0f && dy > 50.0f && dy < 90.0f) {
-                if (mario_lose_cap_to_enemy(marioState, 1) && marioState->playerIndex == 0) {
+                if (marioState->playerIndex == 0 && mario_lose_cap_to_enemy(marioState, 1)) {
                     o->oAnimState = KLEPTO_ANIM_STATE_HOLDING_CAP;
-                    o->globalPlayerIndex = gNetworkPlayers[marioState->playerIndex].globalIndex;
+                    o->globalPlayerIndex = 0;
                 }
             }
         }
@@ -390,10 +378,10 @@ void bhv_klepto_update(void) {
             u8 kleptoHoldingCap = (o->oAnimState == KLEPTO_ANIM_STATE_HOLDING_CAP);
 
             if (kleptoHoldingCap) {
-                struct NetworkPlayer* np = network_player_from_global_index(o->globalPlayerIndex);
-                if (np == NULL) { np = gNetworkPlayerLocal; }
-                u8 modelIndex = (np->overrideModelIndex < CT_MAX) ? np->overrideModelIndex : 0;
-                u32 capModel = gCharacters[modelIndex].capModelId;
+                u32 capModel = MODEL_MARIOS_CAP;
+                if (gMarioStates[0].character != NULL) {
+                    capModel = gMarioStates[0].character->capModelId;
+                }
 
                 gMarioStates[0].cap &= ~SAVE_FLAG_CAP_ON_KLEPTO;
 

@@ -59,9 +59,8 @@ static struct Object* eyerok_spawn_hand(s16 side, s32 model, const BehaviorScrip
 }
 
 void bhv_eyerok_boss_init(void) {
-    struct Object* hands[1];
-    hands[0] = eyerok_spawn_hand(-1, MODEL_EYEROK_LEFT_HAND, bhvEyerokHand);
-    hands[1] = eyerok_spawn_hand(1, MODEL_EYEROK_RIGHT_HAND, bhvEyerokHand);
+    eyerok_spawn_hand(-1, MODEL_EYEROK_LEFT_HAND, bhvEyerokHand);
+    eyerok_spawn_hand(1, MODEL_EYEROK_RIGHT_HAND, bhvEyerokHand);
 }
 
 static void eyerok_boss_act_sleep(void) {
@@ -106,7 +105,6 @@ static void eyerok_boss_act_show_intro_text(void) {
     /*struct MarioState* marioState = nearest_mario_state_to_object(o);
     if (should_start_or_continue_dialog(marioState, o) && cur_obj_update_dialog_with_cutscene(&gMarioStates[0], 2, 0, CUTSCENE_DIALOG, gBehaviorValues.dialogs.EyerokIntroDialog, eyerok_boss_act_show_intro_text_continue_dialog)) {
         o->oAction = EYEROK_BOSS_ACT_FIGHT;
-        network_send_object_reliability(o, TRUE);
     }*/
     o->oAction = EYEROK_BOSS_ACT_FIGHT;
 }
