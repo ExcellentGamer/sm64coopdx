@@ -257,7 +257,11 @@ void bhv_normal_cap_loop(void) {
         o->globalPlayerIndex = 0;
     }
 
-    obj_set_model(o, gMarioStates[network_local_index_from_global(o->globalPlayerIndex)].character->capModelId);
+    if (gNetworkType == NT_NONE) {
+        obj_set_model(o, gMarioStates[0].character->capModelId);
+    } else {
+        obj_set_model(o, gMarioStates[network_local_index_from_global(o->globalPlayerIndex)].character->capModelId);
+    }
 }
 
 void bhv_vanish_cap_init(void) {

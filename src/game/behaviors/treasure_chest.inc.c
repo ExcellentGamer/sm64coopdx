@@ -100,7 +100,9 @@ void bhv_treasure_chest_bottom_loop(void) {
                             play_sound(SOUND_MENU_CAMERA_BUZZ, gGlobalSoundSource);
                             o->parentObj->oTreasureChestSound = 2;
                         }
-                        o->parentObj->oTreasureChestLastNetworkPlayerIndex = gNetworkPlayers[player->playerIndex].globalIndex;
+                        if (gNetworkType != NT_NONE) {
+                            o->parentObj->oTreasureChestLastNetworkPlayerIndex = gNetworkPlayers[player->playerIndex].globalIndex;
+                        }
                         o->parentObj->oTreasureChestSound = 0;
                     }
                 }
@@ -212,6 +214,7 @@ void bhv_treasure_chest_jrb_loop(void) {
         case 1:
             if (o->oTimer == 60) {
                 spawn_mist_particles();
+                spawn_default_star(-1800.0f, -2500.0f, -1700.0f);
                 o->oAction = 2;
             }
             break;
@@ -254,6 +257,7 @@ void bhv_treasure_chest_loop(void) {
         case 1:
             if (o->oTimer == 60) {
                 spawn_mist_particles();
+                spawn_default_star(-1900.0f, -4000.0f, -1400.0f);
                 o->oAction = 2;
             }
             break;
