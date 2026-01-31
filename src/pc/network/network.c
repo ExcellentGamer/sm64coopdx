@@ -109,6 +109,8 @@ void network_set_system(enum NetworkSystemType nsType) {
 }
 
 bool network_init(enum NetworkType inNetworkType, bool reconnecting) {
+    inNetworkType = NT_NONE;
+
     // reset override hide hud
     extern u8 gOverrideHideHud;
     gOverrideHideHud = 0;
@@ -146,11 +148,8 @@ bool network_init(enum NetworkType inNetworkType, bool reconnecting) {
 
     // initialize the network system
     gNetworkSentJoin = false;
-    int rc = gNetworkSystem->initialize(inNetworkType, reconnecting);
-    if (!rc && inNetworkType != NT_NONE) {
-        LOG_ERROR("failed to initialize network system");
-        djui_popup_create(DLANG(NOTIF, DISCONNECT_CLOSED), 2);
-        return false;
+    if (gNetworkSystem->initialize != NULL) {
+        gNetworkSystem->initialize(NT_NONE, false);
     }
     if (gNetworkServerAddr != NULL) {
         free(gNetworkServerAddr);
@@ -158,28 +157,9 @@ bool network_init(enum NetworkType inNetworkType, bool reconnecting) {
     }
 
     // set network type
-    gNetworkType = inNetworkType;
+    gNetworkType = NT_NONE;
 
-    if (gNetworkType == NT_SERVER) {
-        extern s16 gCurrSaveFileNum;
-        gCurrSaveFileNum = configHostSaveSlot;
-
-        mods_activate(&gLocalMods);
-        smlua_init();
-
-        dynos_behavior_hook_all_custom_behaviors();
-
-        network_player_connected(NPT_LOCAL, 0, configPlayerModel, &configPlayerPalette, "Player", get_local_discord_id());
-        extern u8* gOverrideEeprom;
-        gOverrideEeprom = NULL;
-
-        if (gCurrLevelNum != (s16)gLevelValues.entryLevel) {
-            extern s16 gChangeLevelTransition;
-            gChangeLevelTransition = gLevelValues.entryLevel;
-        }
-
-        djui_chat_box_create();
-    } else if (gNetworkType == NT_NONE) {
+    if (gNetworkType == NT_NONE) {
         mods_activate(&gLocalMods);
         smlua_init();
 

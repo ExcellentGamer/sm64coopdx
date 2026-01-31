@@ -15,6 +15,7 @@ static Trajectory** sMipsPaths[] = {
     &gBehaviorValues.trajectories.Mips10Trajectory,
 };
 
+#if 0
 static u32 mipsPrevHeldState = 0;
 
 static void bhv_mips_on_received_pre(UNUSED u8 fromLocalIndex) {
@@ -26,6 +27,7 @@ static void bhv_mips_on_received_post(UNUSED u8 fromLocalIndex) {
         cur_obj_init_animation(0);
     }
 }
+#endif
 
 /**
  * Initializes MIPS' physics parameters and checks if he should be active,

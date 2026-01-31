@@ -3,8 +3,6 @@
 #include "djui_panel_main.h"
 #include "djui_panel_language.h"
 #include "djui_panel_pause.h"
-#include "djui_panel_join.h"
-#include "djui_panel_join_message.h"
 #include "djui_ctx_display.h"
 #include "djui_fps_display.h"
 #include "djui_lua_profiler.h"
@@ -147,8 +145,6 @@ void djui_connect_menu_open(void) {
     djui_panel_shutdown();
     gDjuiInMainMenu = true;
     djui_panel_main_create(NULL);
-    djui_panel_join_create(NULL);
-    djui_panel_join_message_create(NULL);
 }
 
 void djui_lua_error(char* text, struct DjuiColor color) {

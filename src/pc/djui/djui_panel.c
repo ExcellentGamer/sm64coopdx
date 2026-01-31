@@ -2,7 +2,6 @@
 #include "djui_panel.h"
 #include "djui_panel_main.h"
 #include "djui_panel_pause.h"
-#include "djui_panel_join_message.h"
 #include "pc/debuglog.h"
 #include "pc/utils/misc.h"
 #include "sounds.h"
@@ -38,7 +37,6 @@ struct DjuiPanel* djui_panel_add(struct DjuiBase* caller, struct DjuiThreePanel*
     if (sPanelRemoving != NULL) { return NULL; }
     struct DjuiBase* panelBase = &threePanel->base;
     bool firstPanel = (sPanelList == NULL);
-    gDjuiPanelJoinMessageVisible = false;
 
     // remember element that triggered this panel add
     if (sPanelList != NULL) {
@@ -132,8 +130,6 @@ void djui_panel_back(void) {
 
     // play a sound
     play_sound(SOUND_MENU_CLICK_FILE_SELECT, gGlobalSoundSource);
-
-    gDjuiPanelJoinMessageVisible = false;
 }
 
 void djui_panel_update(void) {
@@ -221,7 +217,6 @@ void djui_panel_shutdown(void) {
     sPanelRemoving = NULL;
     sMoveAmount = 0;
     gInteractableOverridePad = false;
-    gDjuiPanelJoinMessageVisible = false;
     gDjuiPanelMainCreated = false;
     gDjuiPanelPauseCreated = false;
     djui_cursor_set_visible(false);

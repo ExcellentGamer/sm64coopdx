@@ -62,37 +62,6 @@ static struct KoopaTheQuickProperties sKoopaTheQuickProperties[] = {
     { &gBehaviorValues.dialogs.KoopaQuickThiStartDialog, &gBehaviorValues.dialogs.KoopaQuickThiWinDialog }
 };
 
-static u32 koopaPathedStartWaypoint = 0;
-static u32 koopaPathedPrevWaypoint = 0;
-static u32 koopaShotFromCannon = 0;
-
-static void bhv_koopa_the_quick_on_received_post(UNUSED u8 fromLocalIndex) {
-    void* path = (o->oKoopaTheQuickRaceIndex == 0)
-               ? (void*) gBehaviorValues.trajectories.KoopaBobTrajectory
-               : (void*) gBehaviorValues.trajectories.KoopaThiTrajectory;
-    o->oPathedStartWaypoint = (struct Waypoint*)path + koopaPathedStartWaypoint;
-    o->oPathedPrevWaypoint  = (struct Waypoint*)path + koopaPathedPrevWaypoint;
-    gMarioShotFromCannon = koopaShotFromCannon;
-}
-
-static void bhv_koopa_the_quick_on_sent_pre(void) {
-    void* path = (o->oKoopaTheQuickRaceIndex == 0)
-               ? (void*) gBehaviorValues.trajectories.KoopaBobTrajectory
-               : (void*) gBehaviorValues.trajectories.KoopaThiTrajectory;
-    koopaPathedStartWaypoint = ((void*)o->oPathedStartWaypoint - path) / sizeof(struct Waypoint*);
-    koopaPathedPrevWaypoint  = ((void*)o->oPathedPrevWaypoint  - path) / sizeof(struct Waypoint*);
-    koopaShotFromCannon = gMarioShotFromCannon;
-}
-
-void bhv_koopa_the_quick_override_ownership(u8* shouldOverride, u8* shouldOwn) {
-    *shouldOverride = TRUE;
-    if (gNetworkType == NT_NONE) {
-        *shouldOwn = TRUE;
-        return;
-    }
-    *shouldOwn = (get_network_player_smallest_global() == gNetworkPlayerLocal);
-}
-
 static void bhv_koopa_the_quick_run_once(void) {
     cur_obj_push_mario_away_from_cylinder(140.0f, 300.0f);
 }

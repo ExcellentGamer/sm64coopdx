@@ -123,6 +123,8 @@ void set_vblank_handler(UNUSED s32 index, UNUSED struct VblankHandler *handler, 
 
 void send_display_list(struct SPTask *spTask) {
     if (!gGameInited) { return; }
+    if (spTask == NULL) { return; }
+    if (spTask->task.t.data_ptr == NULL) { return; }
     gfx_run((Gfx *)spTask->task.t.data_ptr);
 }
 
@@ -398,7 +400,9 @@ void produce_one_dummy_frame(void (*callback)(), u8 clearColorR, u8 clearColorG,
     djui_gfx_displaylist_end();
     end_master_display_list();
     alloc_display_list(0);
-    gfx_run((Gfx*) gGfxSPTask->task.t.data_ptr); // send_display_list
+    if (gGfxSPTask != NULL && gGfxSPTask->task.t.data_ptr != NULL) {
+        gfx_run((Gfx*) gGfxSPTask->task.t.data_ptr); // send_display_list
+    }
     display_and_vsync();
 
     // delay to go easy on the cpu

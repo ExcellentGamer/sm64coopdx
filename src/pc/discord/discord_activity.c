@@ -143,19 +143,6 @@ void discord_activity_update(void) {
 }
 
 void discord_activity_update_check(void) {
-#ifdef COOPNET
-    if (sQueuedLobby > 0) {
-        if (--sQueuedLobby == 0) {
-            gCoopNetDesiredLobby = sQueuedLobbyId;
-            snprintf(gCoopNetPassword, 64, "%s", sQueuedLobbyPassword);
-            network_reset_reconnect_and_rehost();
-            network_set_system(NS_COOPNET);
-            network_init(NT_CLIENT, false);
-            djui_panel_join_message_create(NULL);
-        }
-    }
-#endif
-
     if (gNetworkType == NT_NONE) { return; }
     bool shouldUpdate = false;
     u8 connectedCount = network_player_connected_count();

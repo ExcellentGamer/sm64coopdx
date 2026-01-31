@@ -33,6 +33,7 @@ static u8 sSpinyWalkAttackHandlers[] = {
     /* ATTACK_FROM_BELOW:            */ ATTACK_HANDLER_KNOCKBACK,
 };
 
+#if 0
 static u32 spinyAnimCache = 0;
 
 static void spiny_to_anim_cache(void) {
@@ -68,6 +69,7 @@ static void bhv_spiny_on_received_post(UNUSED u8 localIndex) {
 static void bhv_spiny_on_sent_pre(void) {
     spiny_to_anim_cache();
 }
+#endif
 
 /**
  * If the spiny was spawned by lakitu and mario is far away, despawn.

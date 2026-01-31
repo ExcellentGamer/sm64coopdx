@@ -424,6 +424,7 @@ void wiggler_jumped_on_attack_handler(void) {
     o->oWigglerSquishSpeed = 0.4f;
 }
 
+#if 0
 u8 bhv_wiggler_ignore_if_true(void) {
     return o->oAction == WIGGLER_ACT_UNINITIALIZED;
 }
@@ -454,6 +455,7 @@ void bhv_wiggler_on_received_post(UNUSED u8 localIndex) {
         o->oWigglerTextStatus = WIGGLER_TEXT_STATUS_COMPLETED_DIALOG;
     }
 }
+#endif
 
 /**
  * Update function for bhvWigglerHead.

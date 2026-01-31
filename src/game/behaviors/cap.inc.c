@@ -253,15 +253,7 @@ void bhv_normal_cap_loop(void) {
     if (cap_set_hitbox() == 1)
         save_file_clear_flags(SAVE_FLAG_CAP_ON_GROUND);
 
-    if (o->globalPlayerIndex >= MAX_PLAYERS) {
-        o->globalPlayerIndex = 0;
-    }
-
-    if (gNetworkType == NT_NONE) {
-        obj_set_model(o, gMarioStates[0].character->capModelId);
-    } else {
-        obj_set_model(o, gMarioStates[network_local_index_from_global(o->globalPlayerIndex)].character->capModelId);
-    }
+    obj_set_model(o, gMarioStates[0].character->capModelId);
 }
 
 void bhv_vanish_cap_init(void) {

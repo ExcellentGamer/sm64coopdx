@@ -29,8 +29,6 @@
 #include "hardcoded.h"
 
 #include "pc/configfile.h"
-#include "pc/network/network.h"
-#include "pc/network/lag_compensation.h"
 #include "pc/lua/smlua_hooks.h"
 #include "pc/lua/utils/smlua_obj_utils.h"
 
@@ -74,7 +72,7 @@ static struct InteractionHandler sInteractionHandlers[] = {
     { INTERACT_CAP,            interact_cap },
     { INTERACT_GRABBABLE,      interact_grabbable },
     { INTERACT_TEXT,           interact_text },
-    { INTERACT_PLAYER,         interact_player },
+    { 0,                       NULL },
 };
 
 static u32 sForwardKnockbackActions[][3] = {
@@ -156,18 +154,6 @@ u32 determine_interaction(struct MarioState *m, struct Object *o) {
     // Interaction already set
     if (interaction != 0) {
         return interaction;
-    }
-
-    // PvP water punch
-    if (action == ACT_WATER_PUNCH && o->oInteractType & INTERACT_PLAYER) {
-        f32 cossPitch = coss(m->faceAngle[0]);
-        Vec3f facing = { sins(m->faceAngle[1])*cossPitch, sins(m->faceAngle[0]), coss(m->faceAngle[1])*cossPitch };
-        Vec3f dif = { o->oPosX - m->pos[0], (o->oPosY + o->hitboxHeight * 0.5) - (m->pos[1] + m->marioObj->hitboxHeight * 0.5), o->oPosZ - m->pos[2] };
-        vec3f_normalize(dif);
-        f32 dot = vec3f_dot(facing, dif);
-        if (dot >= 0.6f) { // ~53 degrees
-            return INT_PUNCH;
-        }
     }
 
     // Attacks
@@ -310,9 +296,6 @@ void mario_stop_riding_object(struct MarioState *m) {
     if (!m || m->riddenObj == NULL || m->playerIndex != 0) { return; }
     
     m->riddenObj->oInteractStatus = INT_STATUS_STOP_RIDING;
-    if (m->riddenObj->oSyncID != 0) {
-        network_send_object_reliability(m->riddenObj, TRUE);
-    }
     stop_shell_music();
     m->riddenObj = NULL;
 }
@@ -351,10 +334,6 @@ void mario_drop_held_object(struct MarioState *m) {
 
         m->heldObj->oMoveAngleYaw = m->faceAngle[1];
 
-        if (m->heldObj->oSyncID != 0) {
-            network_send_object(m->heldObj);
-        }
-
         m->heldObj = NULL;
     }
 }
@@ -377,10 +356,6 @@ void mario_throw_held_object(struct MarioState *m) {
         }
 
         m->heldObj->oMoveAngleYaw = m->faceAngle[1];
-
-        if (m->heldObj->oSyncID != 0) {
-            network_send_object(m->heldObj);
-        }
 
         m->heldObj = NULL;
     }
@@ -419,7 +394,7 @@ void mario_blow_off_cap(struct MarioState *m, f32 capSpeed) {
     u8 capModel = m->character->capModelId;
     struct Object *capObject = spawn_object(m->marioObj, capModel, bhvNormalCap);
     if (capObject == NULL) { return; }
-    capObject->globalPlayerIndex = gNetworkPlayers[m->playerIndex].globalIndex;
+    capObject->globalPlayerIndex = 0;
     capObject->oBehParams = m->playerIndex + 1;
 
     capObject->oPosY += (m->action & ACT_FLAG_SHORT_HITBOX) ? 120.0f : 180.0f;
@@ -429,13 +404,6 @@ void mario_blow_off_cap(struct MarioState *m, f32 capSpeed) {
     if (m->forwardVel < 0.0f) {
         capObject->oMoveAngleYaw = (s16)(capObject->oMoveAngleYaw + 0x8000);
     }
-
-    // set as it's own parent so we can spawn it over the network
-    capObject->parentObj = capObject;
-
-    struct Object* spawn_objects[] = { capObject };
-    u32 models[] = { capModel };
-    network_send_spawn_objects(spawn_objects, models, 1);
 }
 
 u32 mario_lose_cap_to_enemy(struct MarioState* m, u32 arg) {
@@ -694,51 +662,12 @@ u32 determine_knockback_action(struct MarioState *m, UNUSED s32 arg) {
         }
     }
 
-    f32 sign = 1.0f;
     if (-0x4000 <= facingDYaw && facingDYaw <= 0x4000) {
-        sign = -1.0f;
         m->forwardVel *= -1.0f;
         bonkAction = sBackwardKnockbackActions[terrainIndex][strengthIndex];
     } else {
         m->faceAngle[1] += 0x8000;
         bonkAction = sForwardKnockbackActions[terrainIndex][strengthIndex];
-    }
-
-    // set knockback very high when dealing with player attacks
-    if (m->interactObj != NULL && (m->interactObj->oInteractType & INTERACT_PLAYER) && terrainIndex != 2) {
-        f32 scaler = 1.0f;
-        s8 hasBeenPunched = FALSE;
-#define IF_REVAMPED_PVP(is, isNot) (gServerSettings.pvpType == PLAYER_PVP_REVAMPED ? (is) : (isNot));
-        for (s32 i = 0; i < MAX_PLAYERS; i++) {
-            struct MarioState* m2 = &gMarioStates[i];
-            if (!is_player_active(m2)) { continue; }
-            if (m2->marioObj == NULL) { continue; }
-            if (m2->marioObj != m->interactObj) { continue; }
-            // Redundent check in case the kicking flag somehow gets missed
-            if (m2->action == ACT_JUMP_KICK || m2->flags & MARIO_KICKING) { scaler = IF_REVAMPED_PVP(1.9f, 2.0f); }
-            else if (m2->action == ACT_DIVE) { scaler = 1.0f + IF_REVAMPED_PVP(m2->forwardVel * 0.005f, 0.0f); }
-            else if ((m2->flags & MARIO_PUNCHING)) { scaler = IF_REVAMPED_PVP(-0.1f, 1.0f); hasBeenPunched = gServerSettings.pvpType == PLAYER_PVP_REVAMPED; }
-            if (m2->flags & MARIO_METAL_CAP) { scaler *= 1.25f; }
-            break;
-        }
-
-        if (m->flags & MARIO_METAL_CAP) {
-            scaler *= 0.5f;
-            if (scaler < 1) { scaler = 1; }
-        }
-
-        f32 mag = scaler * (f32)gServerSettings.playerKnockbackStrength * sign;
-        m->forwardVel = mag;
-        if (sign > 0 && terrainIndex == 1) { mag *= -1.0f; }
-
-        m->vel[0] = (-mag * sins(m->interactObj->oFaceAngleYaw)) * IF_REVAMPED_PVP(1.1f, 1.0f);
-        m->vel[1] = ((mag < 0) ? -mag : mag) * IF_REVAMPED_PVP(0.9f, 1.0f);
-        m->vel[2] = (-mag * coss(m->interactObj->oFaceAngleYaw)) * IF_REVAMPED_PVP(1.1f, 1.0f);
-        m->slideVelX = m->vel[0];
-        m->slideVelZ = m->vel[2];
-        m->knockbackTimer = hasBeenPunched ? PVP_ATTACK_KNOCKBACK_TIMER_OVERRIDE : PVP_ATTACK_KNOCKBACK_TIMER_DEFAULT;
-#undef IF_REVAMPED_PVP
-        m->faceAngle[1] = m->interactObj->oFaceAngleYaw + (sign == 1.0f ? 0 : 0x8000);
     }
 
     return bonkAction;
@@ -836,13 +765,6 @@ u32 take_damage_from_interact_object(struct MarioState *m) {
         damage = 0;
     }
 
-    // disable player-to-player damage if the server says so
-    if (m->interactObj != NULL && m->interactObj->oInteractType & INTERACT_PLAYER) {
-        if (gServerSettings.playerInteractions != PLAYER_INTERACTIONS_PVP) {
-            damage = 0;
-        }
-    }
-
     m->hurtCounter += 4 * damage;
 
     queue_rumble_data_mario(m, 5, 80);
@@ -907,8 +829,6 @@ u32 interact_coin(struct MarioState *m, UNUSED u32 interactType, struct Object *
         queue_rumble_data_mario(m, 5, 80);
     }
 
-    network_send_collect_coin(o);
-
     return FALSE;
 }
 
@@ -928,16 +848,11 @@ u32 interact_star_or_key(struct MarioState *m, UNUSED u32 interactType, struct O
     u32 starGrabAction = ACT_STAR_DANCE_EXIT;
     u32 noExit = (o->oInteractionSubtype & INT_SUBTYPE_NO_EXIT) != 0;
     u32 grandStar = (o->oInteractionSubtype & INT_SUBTYPE_GRAND_STAR) != 0;
-
-    u8 stayInLevelCommon = !(gCurrLevelNum == LEVEL_BOWSER_1 || gCurrLevelNum == LEVEL_BOWSER_2 || gCurrLevelNum == LEVEL_BOWSER_3);
-    if (stayInLevelCommon && gServerSettings.stayInLevelAfterStar) { noExit = TRUE; }
     gLastCollectedStarOrKey = o->behavior == smlua_override_behavior(bhvBowserKey);
 
     if (m->health >= 0x100) {
 
-        if (gServerSettings.stayInLevelAfterStar != 2) {
-            mario_stop_riding_and_holding(m);
-        }
+        mario_stop_riding_and_holding(m);
 
         queue_rumble_data_mario(m, 5, 80);
 
@@ -982,11 +897,6 @@ u32 interact_star_or_key(struct MarioState *m, UNUSED u32 interactType, struct O
         m->usedObj = o;
 
         starIndex = (o->oBehParams >> 24) & (gLevelValues.useGlobalStarIds ? 0xFF : 0x1F);
-
-        if (m == &gMarioStates[0]) {
-            // sync the star collection
-            network_send_collect_star(o, m->numCoins, starIndex);
-        }
         save_file_collect_star_or_key(m->numCoins, starIndex, 0);
 
         s32 numStars = save_file_get_total_star_count(gCurrSaveFileNum - 1, COURSE_MIN - 1, COURSE_MAX - 1);
@@ -1008,10 +918,6 @@ u32 interact_star_or_key(struct MarioState *m, UNUSED u32 interactType, struct O
             return set_mario_action(m, ACT_JUMBO_STAR_CUTSCENE, 0);
         }
         save_file_do_save(gCurrSaveFileNum - 1, TRUE);
-
-        if (noExit && gServerSettings.stayInLevelAfterStar == 2) {
-            return TRUE;
-        }
 
         return set_mario_action(m, starGrabAction, noExit + 2 * grandStar);
     }
@@ -1370,21 +1276,12 @@ static u8 resolve_player_collision(struct MarioState* m, struct MarioState* m2) 
 }
 
 u8 determine_player_damage_value(struct MarioState* attacker, u32 interaction) {
-    if (gServerSettings.pvpType == PLAYER_PVP_REVAMPED) {
-        if (attacker->action == ACT_GROUND_POUND_LAND) { return 2; }
-        else if (interaction & INT_GROUND_POUND) { return 3; }
-        else if (interaction & (INT_KICK | INT_SLIDE_KICK | INT_TRIP | INT_TWIRL)) { return 2; }
-        else if (interaction & INT_PUNCH && attacker->actionArg < 3) { return 2; }
-        else if (attacker->action == ACT_FLYING) { return (u8)(MAX((attacker->forwardVel - 40.0f) / 20.0f, 0)) + 1; }
-        return 1;
-    } else {
-        if (interaction & INT_GROUND_POUND_OR_TWIRL) { return 3; }
-        else if (interaction & INT_KICK) { return 2; }
-        else if (interaction & INT_ATTACK_SLIDE) { return 1; }
-        return 2;
-    }
+    (void)attacker;
+    (void)interaction;
+    return 0;
 }
 
+#if 0
 u8 player_is_sliding(struct MarioState* m) {
     if (!m) { return FALSE; }
     if (m->action & (ACT_FLAG_BUTT_OR_STOMACH_SLIDE | ACT_FLAG_DIVING)) {
@@ -1597,6 +1494,7 @@ u32 interact_player_pvp(struct MarioState* attacker, struct MarioState* victim) 
     smlua_call_event_hooks(HOOK_ON_PVP_ATTACK, attacker, victim, interaction);
     return FALSE;
 }
+#endif
 
 u32 interact_igloo_barrier(struct MarioState *m, UNUSED u32 interactType, struct Object *o) {
     if (!m || !o) { return FALSE; }
@@ -2180,7 +2078,6 @@ u32 interact_cap(struct MarioState *m, UNUSED u32 interactType, struct Object *o
         if (capMusic != 0) {
             play_cap_music(capMusic);
         }
-        network_send_collect_item(o);
         return TRUE;
     }
 
@@ -2204,7 +2101,6 @@ u32 interact_grabbable(struct MarioState *m, u32 interactType, struct Object *o)
 
     if ((o->oInteractionSubtype & INT_SUBTYPE_GRABS_MARIO)) {
         if (check_object_grab_mario(m, interactType, o)) {
-            if (o->oSyncID != 0) { network_send_object(o); }
             return TRUE;
         }
     }
@@ -2213,7 +2109,6 @@ u32 interact_grabbable(struct MarioState *m, u32 interactType, struct Object *o)
         if (!(o->oInteractionSubtype & INT_SUBTYPE_NOT_GRABBABLE)) {
             m->interactObj = o;
             m->input |= INPUT_INTERACT_OBJ_GRABBABLE;
-            if (o->oSyncID != 0) { network_send_object(o); }
             return TRUE;
         }
     }
@@ -2370,17 +2265,10 @@ void mario_process_interactions(struct MarioState *m) {
 
     if (!(m->action & ACT_FLAG_INTANGIBLE) && m->collidedObjInteractTypes != 0 && is_player_active(m)) {
         s32 i;
-        for (i = 0; i < 32; i++) {
+        for (i = 0; sInteractionHandlers[i].interactType != 0; i++) {
             u32 interactType = sInteractionHandlers[i].interactType;
             if (m->collidedObjInteractTypes & interactType) {
                 struct Object *object = mario_get_collided_object(m, interactType);
-                bool allowRemoteInteractions = object && object->allowRemoteInteractions;
-
-                if (m->playerIndex != 0 && interactType != (u32)INTERACT_PLAYER && interactType != (u32)INTERACT_POLE && !allowRemoteInteractions) {
-                    // skip interactions for remote
-                    continue;
-                }
-
                 m->collidedObjInteractTypes &= ~interactType;
 
                 if (object && !(object->oInteractStatus & INT_STATUS_INTERACTED)) {
@@ -2396,15 +2284,6 @@ void mario_process_interactions(struct MarioState *m) {
                     }
                 }
             }
-        }
-    }
-
-    if (!(m->action & ACT_FLAG_INTANGIBLE) && is_player_active(m)) {
-        for (s32 i = 0; i < MAX_PLAYERS; i++) {
-            struct NetworkPlayer* np2 = &gNetworkPlayers[i];
-            if (!np2->connected) { continue; }
-            if (&gMarioStates[i] == m) { continue; }
-            interact_player_pvp(m, &gMarioStates[i]);
         }
     }
 

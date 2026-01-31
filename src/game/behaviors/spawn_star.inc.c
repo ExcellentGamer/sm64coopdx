@@ -259,6 +259,7 @@ struct Object *spawn_no_exit_star(f32 x, f32 y, f32 z) {
  * These stars require the global index for a network player for proper
  * cutscene functionality.
  */
+#if 0
 struct Object *spawn_networked_default_star(f32 x, f32 y, f32 z, u8 networkPlayerIndex) {
     if (sCurrPlayMode != PLAY_MODE_NORMAL && sCurrPlayMode != PLAY_MODE_PAUSED) { return NULL; }
     if (o == NULL) { return NULL; }
@@ -283,6 +284,7 @@ struct Object *spawn_networked_default_star(f32 x, f32 y, f32 z, u8 networkPlaye
     }
     return star;
 }
+#endif
 
 void bhv_hidden_red_coin_star_init(void) {
     if (gCurrCourseNum != COURSE_JRB) {

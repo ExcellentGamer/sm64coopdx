@@ -141,6 +141,7 @@ u8 unused0EA1FC[] = { 2,  0,   0, 0, 0,  0,   0, 0, 63, 128, 0, 0, 2,  0,   0, 0
                       63, 128, 0, 0, 2,  0,   0, 0, 65, 160, 0, 0, 63, 128, 0, 0, 2,  0,   0, 0,
                       65, 160, 0, 0, 63, 128, 0, 0, 8,  0,   0, 0, 65, 32,  0, 0, 63, 128, 0, 0 };
 
+#if 0
 static void cannon_on_received_post(u8 fromLocalIndex) {
     // check if we're on in the cannon too
     struct MarioState* m = &gMarioStates[0];
@@ -166,6 +167,7 @@ static void cannon_on_received_post(u8 fromLocalIndex) {
         o->oCannonPlayerIndex = fromLocalIndex;
     }
 }
+#endif
 
 static void bhv_cannon_base_sanity_check(void) {
     // figure out if it's still in use
@@ -202,12 +204,14 @@ static void bhv_cannon_base_sanity_check(void) {
     }
 }
 
+#if 0
 void bhv_cannon_override_ownership(u8* shouldOverride, u8* shouldOwn) {
     if ((o->oAction != 0) && (o->oCannonPlayerIndex == 0)) {
         *shouldOverride = TRUE;
         *shouldOwn = TRUE;
     }
 }
+#endif
 
 void bhv_cannon_base_loop(void) {
     bhv_cannon_base_sanity_check();

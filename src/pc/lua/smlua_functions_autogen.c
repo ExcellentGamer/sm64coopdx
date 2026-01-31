@@ -14479,13 +14479,7 @@ int smlua_func_interact_player(lua_State* L) {
         return 0;
     }
 
-    struct MarioState* m = (struct MarioState*)smlua_to_cobject(L, 1, LOT_MARIOSTATE);
-    if (!gSmLuaConvertSuccess) { LOG_LUA("Failed to convert parameter %u for function '%s'", 1, "interact_player"); return 0; }
-    // interactType skipped so mods can't lie about what interaction it is
-    struct Object* o = (struct Object*)smlua_to_cobject(L, 3, LOT_OBJECT);
-    if (!gSmLuaConvertSuccess) { LOG_LUA("Failed to convert parameter %u for function '%s'", 3, "interact_player"); return 0; }
-
-    lua_pushinteger(L, process_interaction(m, INTERACT_PLAYER, o, interact_player));
+    lua_pushinteger(L, 0);
 
     return 1;
 }
@@ -15165,12 +15159,7 @@ int smlua_func_passes_pvp_interaction_checks(lua_State* L) {
         return 0;
     }
 
-    struct MarioState* attacker = (struct MarioState*)smlua_to_cobject(L, 1, LOT_MARIOSTATE);
-    if (!gSmLuaConvertSuccess) { LOG_LUA("Failed to convert parameter %u for function '%s'", 1, "passes_pvp_interaction_checks"); return 0; }
-    struct MarioState* victim = (struct MarioState*)smlua_to_cobject(L, 2, LOT_MARIOSTATE);
-    if (!gSmLuaConvertSuccess) { LOG_LUA("Failed to convert parameter %u for function '%s'", 2, "passes_pvp_interaction_checks"); return 0; }
-
-    lua_pushinteger(L, passes_pvp_interaction_checks(attacker, victim));
+    lua_pushinteger(L, 0);
 
     return 1;
 }
@@ -37857,7 +37846,6 @@ void smlua_bind_functions_autogen(void) {
     smlua_bind_function(L, "interact_warp_door", smlua_func_interact_warp_door);
     smlua_bind_function(L, "interact_door", smlua_func_interact_door);
     smlua_bind_function(L, "interact_cannon_base", smlua_func_interact_cannon_base);
-    smlua_bind_function(L, "interact_player", smlua_func_interact_player);
     smlua_bind_function(L, "interact_igloo_barrier", smlua_func_interact_igloo_barrier);
     smlua_bind_function(L, "interact_tornado", smlua_func_interact_tornado);
     smlua_bind_function(L, "interact_whirlpool", smlua_func_interact_whirlpool);
@@ -37893,7 +37881,6 @@ void smlua_bind_functions_autogen(void) {
     smlua_bind_function(L, "mario_get_collided_object", smlua_func_mario_get_collided_object);
     smlua_bind_function(L, "mario_check_object_grab", smlua_func_mario_check_object_grab);
     smlua_bind_function(L, "get_door_save_file_flag", smlua_func_get_door_save_file_flag);
-    smlua_bind_function(L, "passes_pvp_interaction_checks", smlua_func_passes_pvp_interaction_checks);
     smlua_bind_function(L, "should_push_or_pull_door", smlua_func_should_push_or_pull_door);
     smlua_bind_function(L, "take_damage_and_knock_back", smlua_func_take_damage_and_knock_back);
     smlua_bind_function(L, "get_mario_cap_flag", smlua_func_get_mario_cap_flag);

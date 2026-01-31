@@ -9,21 +9,6 @@ static struct RacingPenguinData sRacingPenguinData[] = {
     { &gBehaviorValues.dialogs.RacingPenguinBigStartDialog, &gBehaviorValues.RacingPenguinBigRadius, &gBehaviorValues.RacingPenguinBigHeight },
 };
 
-static u32 penguinPathedStartWaypoint = 0;
-static u32 penguinPathedPrevWaypoint = 0;
-
-static void bhv_racing_penguin_the_quick_on_received_post(UNUSED u8 fromLocalIndex) {
-    void* path = segmented_to_virtual(gBehaviorValues.trajectories.RacingPenguinTrajectory);
-    o->oPathedStartWaypoint = (struct Waypoint*)path + penguinPathedStartWaypoint;
-    o->oPathedPrevWaypoint  = (struct Waypoint*)path + penguinPathedPrevWaypoint;
-}
-
-static void bhv_racing_penguin_the_quick_on_sent_pre(void) {
-    void* path = segmented_to_virtual(gBehaviorValues.trajectories.RacingPenguinTrajectory);
-    penguinPathedStartWaypoint = ((void*)o->oPathedStartWaypoint - path) / sizeof(struct Waypoint*);
-    penguinPathedPrevWaypoint  = ((void*)o->oPathedPrevWaypoint - path) / sizeof(struct Waypoint*);
-}
-
 void bhv_racing_penguin_run_once(void) {
     cur_obj_align_gfx_with_floor();
     if (BHV_ARR_CHECK(sRacingPenguinData, o->oBehParams2ndByte, struct RacingPenguinData)) {

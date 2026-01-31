@@ -66,6 +66,9 @@ static void djui_lobby_on_hover_end(UNUSED struct DjuiBase* base) {
 }
 
 void djui_panel_join_lobby(struct DjuiBase* caller) {
+    djui_popup_create("Multiplayer is disabled.", 2);
+    (void)caller;
+    return;
     gCoopNetDesiredLobby = (uint64_t)caller->tag;
     snprintf(gCoopNetPassword, 64, "%s", sPassword);
     network_reset_reconnect_and_rehost();

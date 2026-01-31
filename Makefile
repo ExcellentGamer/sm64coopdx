@@ -545,6 +545,27 @@ GODDARD_C_FILES   := $(foreach dir,$(GODDARD_SRC_DIRS),$(wildcard $(dir)/*.c))
 ULTRA_S_FILES     := $(foreach dir,$(ULTRA_SRC_DIRS),$(wildcard $(dir)/*.s))
 GENERATED_C_FILES := $(BUILD_DIR)/assets/mario_anim_data.c $(BUILD_DIR)/assets/demo_data.c
 
+C_FILES           := $(filter-out \
+  src/pc/djui/djui_panel_host%.c \
+  src/pc/djui/djui_panel_join%.c \
+  src/pc/djui/djui_panel_join_message%.c \
+  src/pc/djui/djui_lobby_entry.c \
+  src/pc/djui/djui_panel_rules.c \
+,$(C_FILES))
+
+C_FILES           := $(filter-out \
+  src/pc/network/%.c \
+  src/pc/network/%/%.c \
+  src/pc/network/%/%/%.c \
+  src/pc/network/%/%/%/%.c \
+,$(C_FILES))
+
+C_FILES           += \
+  src/pc/network/version.c \
+  src/pc/network/network_stub.c \
+  src/pc/network/ban_list.c \
+  src/pc/network/moderator_list.c
+
 #ifeq ($(TARGET_N64),0)
 #  GENERATED_C_FILES += $(addprefix $(BUILD_DIR)/bin/,$(addsuffix _skybox.c,$(notdir $(basename $(wildcard textures/skyboxes/*.png)))))
 #endif

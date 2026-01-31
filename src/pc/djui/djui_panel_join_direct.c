@@ -183,6 +183,8 @@ static void djui_panel_join_direct_ip_text_set(struct DjuiInputbox* inputbox1) {
 }
 
 void djui_panel_join_direct_do_join(struct DjuiBase* caller) {
+    djui_popup_create("Multiplayer is disabled.", 2);
+    return;
     if (!(strlen(sInputboxIp->buffer) > 2)) {
         djui_interactable_set_input_focus(&sInputboxIp->base);
         djui_inputbox_select_all(sInputboxIp);

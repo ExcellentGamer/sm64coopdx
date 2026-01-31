@@ -42,14 +42,7 @@ void set_sparkle_spawn_star_hitbox(void) {
 }
 
 void set_home_to_mario(void) {
-    u8 parentIsMario = FALSE;
-    for (s32 i = 0; i < MAX_PLAYERS; i++) {
-        if (o->parentObj == gMarioStates[i].marioObj) {
-            parentIsMario = TRUE;
-            break;
-        }
-    }
-    if (parentIsMario) {
+    if (o->parentObj == gMarioStates[0].marioObj) {
         o->oHomeX = o->parentObj->oPosX;
         o->oHomeZ = o->parentObj->oPosZ;
         o->oHomeY = o->parentObj->oPosY;
@@ -83,6 +76,9 @@ void bhv_spawned_star_loop(void) {
         // All of these are for checking if we spawned the star, If 
         // we didn't. We don't need the time stop.
         u8 playExclamationBoxCutscene = (o->oStarSpawnExtCutsceneFlags && (gNetworkType == NT_NONE || is_nearest_mario_state_to_object(gMarioState, o)));
+        if (gNetworkType == NT_NONE) {
+            playExclamationBoxCutscene = o->oStarSpawnExtCutsceneFlags;
+        }
         u8 playGenericSpawnCutscene = (o->parentObj != NULL && o->parentObj == gMarioStates[0].marioObj);
         u8 playCutscene = (playExclamationBoxCutscene || playGenericSpawnCutscene);
         
@@ -164,7 +160,7 @@ void bhv_spawn_star_no_level_exit(struct Object* object, u32 params, u8 networkS
         star->oInteractionSubtype = INT_SUBTYPE_NO_EXIT;
         obj_set_angle(star, 0, 0, 0);
     }
-    if (networkSendEvent) {
+    if (networkSendEvent && gNetworkType != NT_NONE) {
         network_send_spawn_star_nle(object, params);
     }
 }

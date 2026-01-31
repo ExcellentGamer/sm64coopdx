@@ -346,6 +346,14 @@ static u8 geo_get_processing_object_index(void) {
     }
     if (gCurGraphNodeProcessingObject == NULL) { return 0; }
 
+    if (gNetworkType == NT_NONE) {
+        if (gCurGraphNodeProcessingObject->behavior == bhvMario) {
+            index = gCurGraphNodeProcessingObject->oBehParams - 1;
+            return (index >= MAX_PLAYERS || index < 0) ? 0 : index;
+        }
+        return 0;
+    }
+
     struct NetworkPlayer* np = network_player_from_global_index(gCurGraphNodeProcessingObject->globalPlayerIndex);
     index = (np == NULL) ? 0 : np->localIndex;
     return (index >= MAX_PLAYERS) ? 0 : index;

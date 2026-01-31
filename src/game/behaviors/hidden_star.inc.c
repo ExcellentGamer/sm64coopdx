@@ -33,11 +33,7 @@ void bhv_hidden_star_loop(void) {
             if (o->oTimer > 2) {
                 struct Object *obj = spawn_red_coin_cutscene_star(o->oPosX, o->oPosY, o->oPosZ);
                 if (obj != NULL) {
-                    if (gNetworkType == NT_NONE || o->oHiddenStarLastInteractedObject == &gMarioStates[0]) {
-                        obj->oStarSpawnExtCutsceneFlags = 1;
-                    } else {
-                        obj->oStarSpawnExtCutsceneFlags = 0;
-                    }
+                    obj->oStarSpawnExtCutsceneFlags = 1;
                     spawn_mist_particles();
                 }
                 o->activeFlags = ACTIVE_FLAG_DEACTIVATED;
@@ -59,10 +55,7 @@ void bhv_hidden_star_trigger_loop(void) {
             
             // Set the last person who interacted with a secret to the 
             // parent so only they get the star cutscene.
-            struct MarioState *player = nearest_mario_state_to_object(o);
-            if (player) {
-                hiddenStar->oHiddenStarLastInteractedObject = player;
-            }
+            hiddenStar->oHiddenStarLastInteractedObject = &gMarioStates[0];
 
 #ifdef VERSION_JP
             play_sound(SOUND_MENU_STAR_SOUND, gGlobalSoundSource);

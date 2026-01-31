@@ -247,12 +247,24 @@ void bhv_mario_update(void) {
     for (s32 i = 0; i < MAX_PLAYERS; i++) {
         if (gMarioStates[i].marioObj == NULL) { continue; }
         gMarioStates[i].marioObj->oBehParams = i + 1;
-        gMarioStates[i].marioObj->globalPlayerIndex = gNetworkPlayers[i].globalIndex;
+        if (gNetworkType == NT_NONE) {
+            gMarioStates[i].marioObj->globalPlayerIndex = i;
+        } else {
+            u8 globalIndex = gNetworkPlayers[i].globalIndex;
+            if (globalIndex == UNKNOWN_GLOBAL_INDEX) { globalIndex = 0; }
+            gMarioStates[i].marioObj->globalPlayerIndex = globalIndex;
+        }
     }
 
     // set mario state to the current player
     s32 stateIndex = (gCurrentObject->oBehParams - 1);
     if (stateIndex >= MAX_PLAYERS || stateIndex < 0) { return; }
+
+    if (gNetworkType == NT_NONE && stateIndex != 0) {
+        gCurrentObject->header.gfx.node.flags |= GRAPH_RENDER_INVISIBLE;
+        gCurrentObject->oIntangibleTimer = -1;
+        return;
+    }
     gMarioState = &gMarioStates[stateIndex];
 
     // sanity check torsoPos, it isn't updated off-screen otherwise
@@ -500,7 +512,7 @@ void spawn_objects_from_info(UNUSED s32 unused, struct SpawnInfo *spawnInfo) {
     clear_mario_platform();
 #endif
 
-    if (gCurrAreaIndex == 2) {
+    if (gCurrLevelNum == LEVEL_CCM && gCurrAreaIndex == 2) {
         gCCMEnteredSlide |= 1;
     }
 

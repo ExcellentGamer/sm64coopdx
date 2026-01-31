@@ -99,8 +99,8 @@ static s32 exclamation_replace_model(struct MarioState* m, s32 model) {
 
 void exclamation_box_spawn_contents(struct ExclamationBoxContent *content, u8 itemId) {
     if (content == NULL) { return; }
-    struct MarioState* marioState = nearest_mario_state_to_object(o);
-    struct Object* player = marioState ? marioState->marioObj : NULL;
+    struct MarioState* marioState = &gMarioStates[0];
+    struct Object* player = marioState->marioObj;
     struct Object *spawnedObject = NULL;
 
     if (o->oExclamationBoxForce) {
@@ -117,7 +117,7 @@ void exclamation_box_spawn_contents(struct ExclamationBoxContent *content, u8 it
                 spawnedObject->oForwardVel = 3.0f;
                 if (player) {
                     spawnedObject->oMoveAngleYaw = player->oMoveAngleYaw;
-                    spawnedObject->globalPlayerIndex = player->globalPlayerIndex;
+                    spawnedObject->globalPlayerIndex = 0;
                 }
             }
             o->oBehParams |= content->firstByte << 24;

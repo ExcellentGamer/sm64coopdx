@@ -4,7 +4,6 @@
 #include "djui_panel_player.h"
 #include "djui_panel_dynos.h"
 #include "djui_panel_options.h"
-#include "djui_panel_host.h"
 #include "djui_panel_menu.h"
 #include "djui_panel_confirm.h"
 #include "djui_panel_mod_menu.h"
@@ -14,7 +13,6 @@
 #include "game/object_helpers.h"
 #include "behavior_table.h"
 #include "game/level_update.h"
-#include "djui_panel_host_mods.h"
 
 bool gDjuiPanelPauseCreated = false;
 
@@ -95,8 +93,6 @@ void djui_panel_pause_create(struct DjuiBase* caller) {
         } else if (gHookedModMenuElementsCount > 0) {
             djui_button_create(body, DLANG(PAUSE, MOD_MENU), DJUI_BUTTON_STYLE_NORMAL, djui_panel_mod_menu_create);
         }
-
-        djui_button_create(body, "Mods", DJUI_BUTTON_STYLE_NORMAL, djui_panel_host_mods_create);
 
         djui_button_create(body, DLANG(PAUSE, RESUME), DJUI_BUTTON_STYLE_NORMAL, djui_panel_pause_resume);
 

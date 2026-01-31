@@ -15,6 +15,10 @@
 #include "sounds.h"
 
 void djui_panel_do_host(bool reconnecting, bool playSound) {
+    djui_popup_create("Multiplayer is disabled.", 2);
+    (void)reconnecting;
+    (void)playSound;
+    return;
     stop_demo(NULL);
     djui_panel_shutdown();
     extern s16 gCurrSaveFileNum;

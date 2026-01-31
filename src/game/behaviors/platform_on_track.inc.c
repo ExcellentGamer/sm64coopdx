@@ -53,6 +53,7 @@ static void platform_on_track_mario_not_on_platform(void) {
     }
 }
 
+#if 0
 static u32 platformTrackPathedPrevWaypoint = 0;
 
 static void bhv_platform_track_on_received_post(UNUSED u8 fromLocalIndex) {
@@ -64,6 +65,7 @@ static void bhv_platform_track_on_sent_pre(void) {
     if (o->oPathedStartWaypoint == NULL) { platformTrackPathedPrevWaypoint = 0; return; }
     platformTrackPathedPrevWaypoint = ((u8*)o->oPathedPrevWaypoint - (u8*)o->oPathedStartWaypoint) / sizeof(struct Waypoint*);
 }
+#endif
 
 /**
  * Init function for bhvPlatformOnTrack.
