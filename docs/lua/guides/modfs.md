@@ -17,9 +17,9 @@ Each ModFS file system:
 - Is stored on disk as a `.modfs` file, which is a ZIP file, containing all files written in it.
 
 The ModFS files are located in the `sav` directory at the usual save file location:
-- Windows: `%appdata%/sm64coopdx`
-- Linux: `~/.local/share/sm64coopdx`
-- MacOS: `~/Library/Application Support/sm64coopdx`
+- Windows: `%appdata%/render96dx`
+- Linux: `~/.local/share/render96dx`
+- MacOS: `~/Library/Application Support/render96dx`
 
 ### Files
 
@@ -144,9 +144,9 @@ All errors coming from ModFS functions are not blocking. However, they appear in
 
 <br>
 
-## Usage with other sm64coopdx features
+## Usage with other render96dx features
 
-One of the strengths of this feature is its interactions with other existing features of sm64coopdx:
+One of the strengths of this feature is its interactions with other existing features of render96dx:
 - Load models with `smlua_model_util_get_id`
 - Load textures with `get_texture_info`
 - Load collisions with `smlua_collision_util_get`

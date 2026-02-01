@@ -17,29 +17,12 @@ local CHEATS_VERSION = "v1.0"
 --- @type Cheat[]
 local sCheats = {}
 
+local sCheatsEnabled = {}
+
 --- @param m MarioState
 --- Checks if `m` is active
 local function active_player(m)
-    local np = gNetworkPlayers[m.playerIndex]
-    if m.playerIndex == 0 then
-        return true
-    end
-    if not np.connected then
-        return false
-    end
-    if np.currCourseNum ~= gNetworkPlayers[0].currCourseNum then
-        return false
-    end
-    if np.currActNum ~= gNetworkPlayers[0].currActNum then
-        return false
-    end
-    if np.currLevelNum ~= gNetworkPlayers[0].currLevelNum then
-        return false
-    end
-    if np.currAreaIndex ~= gNetworkPlayers[0].currAreaIndex then
-        return false
-    end
-    return true
+    return m.playerIndex == 0
 end
 
 --- @param num integer
@@ -76,9 +59,7 @@ local function register_cheat(codename, names, hook, func, allowHazardSurfaces)
         allowHazardSurfaces = allowHazardSurfaces
     })
 
-    for i = 0, MAX_PLAYERS - 1 do
-        gPlayerSyncTable[i][codename] = false
-    end
+    sCheatsEnabled[codename] = false
 end
 
 --- @param m MarioState
@@ -313,7 +294,7 @@ local function generate_mario_hook_function(hookType)
         if not active_player(m) then return end
 
         for _, cheat in ipairs(sCheats) do
-            if cheat.hook == hookType and gPlayerSyncTable[m.playerIndex][cheat.codename] then
+            if cheat.hook == hookType and sCheatsEnabled[cheat.codename] then
                 cheat.func(m)
             end
         end
@@ -324,7 +305,7 @@ local function before_set_mario_action(m, action)
     if not active_player(m) then return end
 
     for _, cheat in ipairs(sCheats) do
-        if cheat.hook == HOOK_BEFORE_SET_MARIO_ACTION and gPlayerSyncTable[m.playerIndex][cheat.codename] then
+        if cheat.hook == HOOK_BEFORE_SET_MARIO_ACTION and sCheatsEnabled[cheat.codename] then
             return cheat.func(m, action)
         end
     end
@@ -333,7 +314,7 @@ end
 --- @param m MarioState
 local function allow_hazard_surface(m)
     for _, cheat in ipairs(sCheats) do
-        if gPlayerSyncTable[m.playerIndex][cheat.codename] and not cheat.allowHazardSurfaces then return false end
+        if sCheatsEnabled[cheat.codename] and not cheat.allowHazardSurfaces then return false end
     end
     return true
 end
@@ -350,7 +331,7 @@ end
 local function update_cheat(index, value)
     for i, cheat in ipairs(sCheats) do
         if i == index + 1 then
-            gPlayerSyncTable[0][cheat.codename] = value
+            sCheatsEnabled[cheat.codename] = value
         end
     end
 end

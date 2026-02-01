@@ -4,7 +4,7 @@
 
 ## Section 1: Preparation
 
-The Lighting Engine is a vertex point lighting system built directly into sm64coopdx and its renderer. It works on all backends and is relatively easy to use.
+The Lighting Engine is a vertex point lighting system built directly into render96dx and its renderer. It works on all backends and is relatively easy to use.
 
 To use the Lighting Engine, you need to figure out how you want to approach using it given the different modes it has. There are also 2 methods to enable the lighting engine, either by setting the ambient color, or spawning a point light in.
 

@@ -2,7 +2,7 @@
 #define SMLUA_UTILS_H
 
 #include "smlua.h"
-#include "src/pc/network/packets/packet.h"
+#include "pc/network/packets/packet.h"
 
 extern u8 gSmLuaConvertSuccess;
 typedef int LuaFunction;

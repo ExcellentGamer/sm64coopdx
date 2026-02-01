@@ -125,7 +125,7 @@ struct DjuiTheme* djui_menu_get_theme(void) {
 }
 
 bool djui_is_playerlist_ping_visible(void) {
-    return configShowPing;
+    return true;
 }
 
 ///

@@ -13,7 +13,7 @@
 #include "audio/data.h"
 #include "audio/external.h"
 
-#include "network/network.h"
+#include "pc/network/network.h"
 #include "lua/smlua.h"
 
 #include "audio/audio_api.h"
@@ -39,8 +39,6 @@
 
 #include "pc/lua/utils/smlua_audio_utils.h"
 
-#include "pc/network/version.h"
-#include "pc/network/socket/socket.h"
 #include "pc/network/network_player.h"
 #include "pc/update_checker.h"
 #include "pc/djui/djui.h"

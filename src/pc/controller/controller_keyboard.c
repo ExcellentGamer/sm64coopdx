@@ -34,8 +34,6 @@ static int keyboard_map_scancode(int scancode) {
 }
 
 bool keyboard_on_key_down(int scancode) {
-    djui_panel_pause_disconnect_key_update(scancode);
-
     // see if interactable captures this scancode
     if (djui_interactable_on_key_down(scancode)) {
         keyboard_lastkey = scancode;

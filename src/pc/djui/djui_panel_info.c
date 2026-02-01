@@ -10,7 +10,7 @@ void djui_panel_info_create(struct DjuiBase *caller) {
     struct DjuiBase *body = djui_three_panel_get_body(panel);
     {
         snprintf(sInfo, 512, "\
-sm64coopdx is an online multiplayer project for the Super Mario 64 PC port, started by the Coop Deluxe Team.\n\
+render96dx is an online multiplayer project for the Super Mario 64 PC port, started by the Coop Deluxe Team.\n\
 Its purpose is to actively maintain and improve, but also continue sm64ex-coop, created by djoslin0.\n\
 More features, customization, and power to the Lua API allow modders and players to enjoy Super Mario 64 more than ever!");
 

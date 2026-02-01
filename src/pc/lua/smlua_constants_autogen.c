@@ -4629,7 +4629,7 @@ char gSmluaConstants[] = ""
 "VERSION_TEXT='v'\n"
 "VERSION_NUMBER=41\n"
 "MINOR_VERSION_NUMBER=1\n"
-"GAME_NAME='sm64coopdx'\n"
+"GAME_NAME='render96dx'\n"
 "WINDOW_NAME='Render96 Deluxe'\n"
 "MAX_VERSION_LENGTH=128\n"
 ;

@@ -168,7 +168,6 @@ static inline void update_button(const int i, const bool new) {
     joy_buttons[i] = new;
     if (pressed) {
         last_joybutton = i;
-        djui_panel_pause_disconnect_key_update(VK_BASE_SDL_GAMEPAD + i);
         djui_interactable_on_key_down(VK_BASE_SDL_GAMEPAD + i);
     }
     if (unpressed) {

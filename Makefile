@@ -489,17 +489,17 @@ BUILD_DIR_BASE := build
 BUILD_DIR := $(BUILD_DIR_BASE)/$(VERSION)_pc
 
 ifeq ($(WINDOWS_BUILD),1)
-	EXE := $(BUILD_DIR)/sm64coopdx.exe
+	EXE := $(BUILD_DIR)/render96dx.exe
 else # Linux builds/binary namer
 	ifeq ($(TARGET_RPI),1)
-		EXE := $(BUILD_DIR)/sm64coopdx.arm
+		EXE := $(BUILD_DIR)/render96dx.arm
 	else
-		EXE := $(BUILD_DIR)/sm64coopdx
+		EXE := $(BUILD_DIR)/render96dx
 	endif
 endif
 
 ifeq ($(TARGET_RK3588),1)
-  EXE := $(BUILD_DIR)/sm64coopdx.arm
+  EXE := $(BUILD_DIR)/render96dx.arm
 endif
 
 ELF            := $(BUILD_DIR)/$(TARGET).elf
@@ -516,7 +516,7 @@ SRC_DIRS := src src/engine src/game src/audio src/menu src/buffers actors levels
 BIN_DIRS := bin bin/$(VERSION)
 
 # PC files
-SRC_DIRS += src/pc src/pc/gfx src/pc/audio src/pc/controller src/pc/fs src/pc/fs/packtypes src/pc/mods src/pc/dev src/pc/network src/pc/network/packets src/pc/network/socket src/pc/network/coopnet src/pc/utils src/pc/utils/miniz src/pc/djui src/pc/lua src/pc/lua/utils src/pc/os
+SRC_DIRS += src/pc src/pc/gfx src/pc/audio src/pc/controller src/pc/fs src/pc/fs/packtypes src/pc/mods src/pc/dev src/pc/stub src/pc/stub/packets src/pc/utils src/pc/utils/miniz src/pc/djui src/pc/lua src/pc/lua/utils src/pc/os
 
 ifeq ($(DISCORD_SDK),1)
   SRC_DIRS += src/pc/discord
@@ -553,18 +553,21 @@ C_FILES           := $(filter-out \
   src/pc/djui/djui_panel_rules.c \
 ,$(C_FILES))
 
+C_FILES           += src/pc/djui/djui_panel_host_mods.c
+
 C_FILES           := $(filter-out \
   src/pc/network/%.c \
   src/pc/network/%/%.c \
   src/pc/network/%/%/%.c \
   src/pc/network/%/%/%/%.c \
-,$(C_FILES))
+  src/pc/stub/%.c \
+ ,$(C_FILES))
 
 C_FILES           += \
-  src/pc/network/version.c \
-  src/pc/network/network_stub.c \
-  src/pc/network/ban_list.c \
-  src/pc/network/moderator_list.c
+  src/pc/stub/version.c \
+  src/pc/stub/network_stub.c \
+  src/pc/stub/ban_list.c \
+  src/pc/stub/moderator_list.c
 
 #ifeq ($(TARGET_N64),0)
 #  GENERATED_C_FILES += $(addprefix $(BUILD_DIR)/bin/,$(addsuffix _skybox.c,$(notdir $(basename $(wildcard textures/skyboxes/*.png)))))
@@ -1596,7 +1599,7 @@ endif
 # with no prerequisites, .SECONDARY causes no intermediate target to be removed
 .SECONDARY:
 
-APP_DIR = ./sm64coopdx.app
+APP_DIR = ./render96dx.app
 APP_CONTENTS_DIR = $(APP_DIR)/Contents
 APP_MACOS_DIR = $(APP_CONTENTS_DIR)/MacOS
 APP_RESOURCES_DIR = $(APP_CONTENTS_DIR)/Resources
@@ -1609,14 +1612,14 @@ endif
 
 all:
 	@if [ "$(USE_APP)" = "0" ]; then \
-		rm -rf build/us_pc/sm64coopdx.app; \
+		rm -rf build/us_pc/render96dx.app; \
   else \
-		$(PRINT) "$(GREEN)Creating App Bundle: $(BLUE)build/us_pc/sm64coopdx.app\n"; \
+		$(PRINT) "$(GREEN)Creating App Bundle: $(BLUE)build/us_pc/render96dx.app\n"; \
 		rm -rf $(APP_DIR); \
-		rm -rf build/us_pc/sm64coopdx.app; \
+		rm -rf build/us_pc/render96dx.app; \
 		mkdir -p $(APP_MACOS_DIR); \
 		mkdir -p $(APP_RESOURCES_DIR); \
-		mv build/us_pc/sm64coopdx $(APP_MACOS_DIR)/sm64coopdx; \
+		mv build/us_pc/render96dx $(APP_MACOS_DIR)/render96dx; \
     cp -r build/us_pc/mods $(APP_RESOURCES_DIR); \
     cp -r build/us_pc/lang $(APP_RESOURCES_DIR); \
     cp -r build/us_pc/dynos $(APP_RESOURCES_DIR); \
@@ -1626,11 +1629,11 @@ all:
     cp build/us_pc/libcoopnet.dylib $(APP_MACOS_DIR); \
     cp build/us_pc/libjuice.1.6.2.dylib $(APP_MACOS_DIR); \
     cp $(SDL2_LIB) $(APP_MACOS_DIR)/libSDL2.dylib; \
-    install_name_tool -change $(BREW_PREFIX)/opt/sdl2/lib/libSDL2-2.0.0.dylib @executable_path/libSDL2.dylib $(APP_MACOS_DIR)/sm64coopdx; > /dev/null 2>&1 \
+    install_name_tool -change $(BREW_PREFIX)/opt/sdl2/lib/libSDL2-2.0.0.dylib @executable_path/libSDL2.dylib $(APP_MACOS_DIR)/render96dx; > /dev/null 2>&1 \
 		install_name_tool -id @executable_path/libSDL2.dylib $(APP_MACOS_DIR)/libSDL2.dylib; > /dev/null 2>&1 \
     codesign --force --deep --sign - $(APP_MACOS_DIR)/libSDL2.dylib; \
     cp $(GLEW_LIB) $(APP_MACOS_DIR)/libGLEW.dylib; \
-    install_name_tool -change $(BREW_PREFIX)/opt/glew/lib/libGLEW.2.2.dylib @executable_path/libGLEW.dylib $(APP_MACOS_DIR)/sm64coopdx; > /dev/null 2>&1 \
+    install_name_tool -change $(BREW_PREFIX)/opt/glew/lib/libGLEW.2.2.dylib @executable_path/libGLEW.dylib $(APP_MACOS_DIR)/render96dx; > /dev/null 2>&1 \
 		install_name_tool -id @executable_path/libGLEW.dylib $(APP_MACOS_DIR)/libGLEW.dylib; > /dev/null 2>&1 \
     codesign --force --deep --sign - $(APP_MACOS_DIR)/libGLEW.dylib; \
 		cp res/icon.icns $(APP_RESOURCES_DIR)/icon.icns; \
@@ -1640,17 +1643,17 @@ all:
 		echo '<plist version="1.0">' >> $(APP_CONTENTS_DIR)/Info.plist; \
 		echo '<dict>' >> $(APP_CONTENTS_DIR)/Info.plist; \
 		echo '    <key>CFBundleExecutable</key>' >> $(APP_CONTENTS_DIR)/Info.plist; \
-		echo '    <string>sm64coopdx</string>' >> $(APP_CONTENTS_DIR)/Info.plist; \
+		echo '    <string>render96dx</string>' >> $(APP_CONTENTS_DIR)/Info.plist; \
 		echo '    <key>CFBundleIconFile</key>' >> $(APP_CONTENTS_DIR)/Info.plist; \
 		echo '    <string>icon</string>' >> $(APP_CONTENTS_DIR)/Info.plist; \
 		echo '    <key>CFBundleIconName</key>' >> $(APP_CONTENTS_DIR)/Info.plist; \
 		echo '    <string>AppIcon</string>' >> $(APP_CONTENTS_DIR)/Info.plist; \
 		echo '    <key>CFBundleDisplayName</key>' >> $(APP_CONTENTS_DIR)/Info.plist; \
-		echo '    <string>sm64coopdx</string>' >> $(APP_CONTENTS_DIR)/Info.plist; \
+		echo '    <string>render96dx</string>' >> $(APP_CONTENTS_DIR)/Info.plist; \
 		echo '    <!-- Add other keys and values here -->' >> $(APP_CONTENTS_DIR)/Info.plist; \
 		echo '</dict>' >> $(APP_CONTENTS_DIR)/Info.plist; \
 		echo '</plist>' >> $(APP_CONTENTS_DIR)/Info.plist; \
-		chmod +x $(APP_MACOS_DIR)/sm64coopdx; \
+		chmod +x $(APP_MACOS_DIR)/render96dx; \
 		mv $(APP_DIR) build/us_pc/; \
   fi
 

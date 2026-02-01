@@ -1,4 +1,4 @@
-sm64coopdx Developers:
+render96dx Developers:
     Agent X
     AngelicMiracles
     FluffaMario
@@ -6,7 +6,7 @@ sm64coopdx Developers:
     theclashingfritz
     PeachyPeach
 
-sm64coopdx Contributors:
+render96dx Contributors:
     Ale64
     ArcticJaguar725
     Cooliokid 956
@@ -80,4 +80,4 @@ Sounds:
 
 The custom models, levels, textures, animations, and warps use DynOS. DynOS was created by PeachyPeach.
 
-sm64coopdx was built on top of sm64ex-coop, which was built on top of sm64ex, which was built on top of the sm64 decomp project.
+render96dx was built on top of sm64ex-coop, which was built on top of sm64ex, which was built on top of the sm64 decomp project.

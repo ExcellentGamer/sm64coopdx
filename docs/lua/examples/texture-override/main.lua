@@ -8,7 +8,7 @@ if SM64COOPDX_VERSION == nil then
         if not first then
             first = true
             play_sound(SOUND_MENU_CAMERA_BUZZ, gMarioStates[0].marioObj.header.gfx.cameraToObject)
-            djui_chat_message_create("\\#ff7f7f\\Matrix Code is not supported with sm64ex-coop\nas it uses sm64coopdx exclusive Lua functionality.\n\\#dcdcdc\\To use this mod, try out sm64coopdx at\n\\#7f7fff\\https://sm64coopdx.com")
+            djui_chat_message_create("\\#ff7f7f\\Matrix Code is not supported with sm64ex-coop\nas it uses render96dx exclusive Lua functionality.\n\\#dcdcdc\\To use this mod, try out render96dx at\n\\#7f7fff\\https://render96dx.com")
         end
     end)
     return

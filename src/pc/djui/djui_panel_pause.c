@@ -26,16 +26,6 @@ void djui_panel_pause_quit_yes(UNUSED struct DjuiBase* caller) {
     game_exit();
 }
 
-void djui_panel_pause_disconnect_key_update(int scancode) {
-    if (gDjuiInMainMenu || find_object_with_behavior(bhvActSelector) != NULL) { return; }
-
-    for (int i = 0; i < MAX_BINDS; i++) {
-        if (scancode == (int)configKeyDisconnect[i]) {
-            djui_panel_pause_quit(NULL);
-        }
-    }
-}
-
 static void djui_panel_pause_quit(struct DjuiBase* caller) {
     if (gMarioStates[0].action == ACT_PUSHING_DOOR || gMarioStates[0].action == ACT_PULLING_DOOR) { return; }
 

@@ -217,53 +217,6 @@ bool djui_interactable_on_key_down(int scancode) {
         return true;
     }
 
-    if (gDjuiChatBox != NULL && !gDjuiChatBoxFocus) {
-        bool pressChat = false;
-        for (int i = 0; i < MAX_BINDS; i++) {
-            if (scancode == (int)configKeyChat[i]) { pressChat = true; }
-        }
-
-        if (pressChat && !gDjuiConsoleFocus) {
-            djui_chat_box_toggle();
-            return true;
-        }
-    }
-
-    if ((gDjuiPlayerList != NULL || gDjuiModList != NULL)) {
-        for (int i = 0; i < MAX_BINDS; i++) {
-            if (scancode == (int)configKeyPlayerList[i] && !gDjuiInMainMenu && gNetworkType != NT_NONE) {
-                if (gServerSettings.enablePlayerList) {
-                    if (gDjuiPlayerList != NULL) {
-                        djui_base_set_visible(&gDjuiPlayerList->base, true);
-                    }
-                    if (gDjuiModList != NULL) {
-                        djui_base_set_visible(&gDjuiModList->base, true);
-                    }
-                }
-                gAttemptingToOpenPlayerlist = true;
-                break;
-            }
-            if (gDjuiPlayerList->base.visible) {
-                if (scancode == (int)configKeyNextPage[i]) {
-                    sPageIndex++;
-                    if (sPageIndex > ((network_player_connected_count() - 1) / sPlayerListSize)) {
-                        sPageIndex = 0;
-                    }
-                    break;
-                }
-                if (scancode == (int)configKeyPrevPage[i]) {
-                    if (sPageIndex == 0) {
-                        sPageIndex = ((network_player_connected_count() - 1) / sPlayerListSize);
-                    }
-                    else {
-                        sPageIndex--;
-                    }
-                    break;
-                }
-            }
-        }
-    }
-
     if (gDjuiChatBoxFocus || djui_panel_is_active()) {
         switch (scancode) {
             case SCANCODE_UP:    sKeyboardHoldDirection = PAD_HOLD_DIR_UP;    return true;
@@ -278,27 +231,6 @@ bool djui_interactable_on_key_down(int scancode) {
 }
 
 void djui_interactable_on_key_up(int scancode) {
-
-    if (!gDjuiChatBoxFocus) {
-        for (int i = 0; i < MAX_BINDS; i++) {
-            if (scancode == (int)configKeyConsole[i]) { djui_console_toggle(); break; }
-        }
-    }
-
-    if (gDjuiPlayerList != NULL || gDjuiModList != NULL) {
-        for (int i = 0; i < MAX_BINDS; i++) {
-            if (scancode == (int)configKeyPlayerList[i]) {
-                if (gDjuiPlayerList != NULL) {
-                    djui_base_set_visible(&gDjuiPlayerList->base, false);
-                }
-                if (gDjuiModList != NULL) {
-                    djui_base_set_visible(&gDjuiModList->base, false);
-                }
-                gAttemptingToOpenPlayerlist = false;
-                break;
-            }
-        }
-    }
 
     bool keyFocused = (gInteractableFocus != NULL)
                    && (gInteractableFocus->interactable != NULL)

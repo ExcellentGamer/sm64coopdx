@@ -25,17 +25,17 @@ jobs:
               run: |
                 cd tools
                 g++ -std=c++17 -o hash_file hash_file.cpp
-                echo "::notice ::$(./hash_file ../build/us_pc/sm64coopdx)"
+                echo "::notice ::$(./hash_file ../build/us_pc/render96dx)"
             
             - name: Zip the game
               run: |
                 cd ./build/us_pc
-                zip -r sm64coopdx_Linux.zip dynos lang mods palettes libdiscord_game_sdk.so sm64coopdx
+                zip -r sm64coopdx_Linux.zip dynos lang mods palettes libdiscord_game_sdk.so render96dx
 
             - name: Upload artifact
               uses: actions/upload-artifact@v4
               with:
-                name: sm64coopdx-linux
+                name: render96dx-linux
                 path: ./build/us_pc/sm64coopdx_Linux.zip
     
     build-steamos:
@@ -57,17 +57,17 @@ jobs:
               run: |
                 cd tools
                 g++ -std=c++17 -o hash_file hash_file.cpp
-                echo "::notice ::$(./hash_file ../build/us_pc/sm64coopdx)"
+                echo "::notice ::$(./hash_file ../build/us_pc/render96dx)"
             
             - name: Zip the game
               run: |
                 cd ./build/us_pc
-                zip -r sm64coopdx_SteamOS.zip dynos lang mods palettes libdiscord_game_sdk.so sm64coopdx
+                zip -r sm64coopdx_SteamOS.zip dynos lang mods palettes libdiscord_game_sdk.so render96dx
 
             - name: Upload artifact
               uses: actions/upload-artifact@v4
               with:
-                name: sm64coopdx-steamos
+                name: render96dx-steamos
                 path: ./build/us_pc/sm64coopdx_SteamOS.zip
 
     build-windows-opengl:
@@ -107,17 +107,17 @@ jobs:
               run: |
                 cd tools
                 g++ -std=c++17 -o hash_file.exe hash_file.cpp
-                echo "::notice ::$(./hash_file.exe ../build/us_pc/sm64coopdx.exe)"
+                echo "::notice ::$(./hash_file.exe ../build/us_pc/render96dx.exe)"
             
             - name: Zip the game
               run: |
                 cd ./build/us_pc
-                zip -r sm64coopdx_Windows_OpenGL.zip dynos lang mods palettes coop.map discord_game_sdk.dll sm64coopdx.exe
+                zip -r sm64coopdx_Windows_OpenGL.zip dynos lang mods palettes coop.map discord_game_sdk.dll render96dx.exe
 
             - name: Upload artifact
               uses: actions/upload-artifact@v4
               with:
-                name: sm64coopdx-windows-opengl
+                name: render96dx-windows-opengl
                 path: ./build/us_pc/sm64coopdx_Windows_OpenGL.zip
 
     build-windows-directx:
@@ -157,17 +157,17 @@ jobs:
               run: |
                 cd tools
                 g++ -std=c++17 -o hash_file.exe hash_file.cpp
-                echo "::notice ::$(./hash_file.exe ../build/us_pc/sm64coopdx.exe)"
+                echo "::notice ::$(./hash_file.exe ../build/us_pc/render96dx.exe)"
             
             - name: Zip the game
               run: |
                 cd ./build/us_pc
-                zip -r sm64coopdx_Windows_DirectX.zip dynos lang mods palettes coop.map discord_game_sdk.dll sm64coopdx.exe
+                zip -r sm64coopdx_Windows_DirectX.zip dynos lang mods palettes coop.map discord_game_sdk.dll render96dx.exe
 
             - name: Upload artifact
               uses: actions/upload-artifact@v4
               with:
-                name: sm64coopdx-windows-directx
+                name: render96dx-windows-directx
                 path: ./build/us_pc/sm64coopdx_Windows_DirectX.zip
 
     build-macos-arm:
@@ -187,23 +187,23 @@ jobs:
 
             - name: Code sign the app (Ad-Hoc)
               run: |
-                codesign --force --deep --sign - ./build/us_pc/sm64coopdx.app
+                codesign --force --deep --sign - ./build/us_pc/render96dx.app
 
             - name: Generate hash
               run: |
                 cd tools
                 g++ -std=c++17 -o hash_file hash_file.cpp
-                echo "::notice ::$(./hash_file ../build/us_pc/sm64coopdx.app/Contents/MacOS/sm64coopdx)"
+                echo "::notice ::$(./hash_file ../build/us_pc/render96dx.app/Contents/MacOS/render96dx)"
 
             - name: Zip the .app bundle
               run: |
                 cd ./build/us_pc
-                zip -r sm64coopdx_macOS_ARM.zip sm64coopdx.app
+                zip -r sm64coopdx_macOS_ARM.zip render96dx.app
             
             - name: Upload artifact
               uses: actions/upload-artifact@v4
               with:
-                name: sm64coopdx-macos-arm
+                name: render96dx-macos-arm
                 path: ./build/us_pc/sm64coopdx_macOS_ARM.zip
 
     build-macos-intel:
@@ -223,21 +223,21 @@ jobs:
 
             - name: Code sign the app (Ad-Hoc)
               run: |
-                codesign --force --deep --sign - ./build/us_pc/sm64coopdx.app
+                codesign --force --deep --sign - ./build/us_pc/render96dx.app
 
             - name: Generate hash
               run: |
                 cd tools
                 g++ -std=c++17 -o hash_file hash_file.cpp
-                echo "::notice ::$(./hash_file ../build/us_pc/sm64coopdx.app/Contents/MacOS/sm64coopdx)"
+                echo "::notice ::$(./hash_file ../build/us_pc/render96dx.app/Contents/MacOS/render96dx)"
 
             - name: Zip the .app bundle
               run: |
                 cd ./build/us_pc
-                zip -r sm64coopdx_macOS_Intel.zip sm64coopdx.app
+                zip -r sm64coopdx_macOS_Intel.zip render96dx.app
             
             - name: Upload artifact
               uses: actions/upload-artifact@v4
               with:
-                name: sm64coopdx-macos-intel
+                name: render96dx-macos-intel
                 path: ./build/us_pc/sm64coopdx_macOS_Intel.zip

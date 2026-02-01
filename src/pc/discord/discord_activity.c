@@ -94,9 +94,9 @@ void discord_activity_update(void) {
     sCurActivity.type = DiscordActivityType_Playing;
 
     snprintf(sCurActivity.assets.large_image, 128, "characters");
-    snprintf(sCurActivity.assets.large_text, 128, "sm64coopdx Characters");
+    snprintf(sCurActivity.assets.large_text, 128, "render96dx Characters");
     snprintf(sCurActivity.assets.small_image, 128, "icon");
-    snprintf(sCurActivity.assets.small_text, 128, "sm64coopdx Icon");
+    snprintf(sCurActivity.assets.small_text, 128, "render96dx Icon");
 
     if (gNetworkType != NT_NONE && gNetworkSystem) {
         gNetworkSystem->get_lobby_id(sCurActivity.party.id, 128);

@@ -11182,10 +11182,10 @@ VERSION_NUMBER = 41
 MINOR_VERSION_NUMBER = 1
 
 --- @type string
-GAME_NAME = "sm64coopdx"
+GAME_NAME = "render96dx"
 
 --- @type string
-WINDOW_NAME = "Super Mario 64 Coop Deluxe"
+WINDOW_NAME = "Render96 Deluxe"
 
 --- @type integer
 MAX_VERSION_LENGTH = 128

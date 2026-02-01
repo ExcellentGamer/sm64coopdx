@@ -66,7 +66,7 @@ static void playerlist_update_row(u8 i, struct NetworkPlayer *np) {
     }
 
     djui_base_set_visible(&djuiRow[i]->base, visible);
-    djui_base_set_visible(&djuiPingImages[i]->base, configShowPing);
+    djui_base_set_visible(&djuiPingImages[i]->base, true);
 
     u8* rgb = network_get_player_text_color(np->localIndex);
     djui_base_set_color(&djuiTextNames[i]->base, rgb[0], rgb[1], rgb[2], 255);
@@ -81,7 +81,7 @@ static void playerlist_update_row(u8 i, struct NetworkPlayer *np) {
           : np->overrideLocation
     );
     djui_text_set_text(djuiTextAct[i], sActNum);
-    djui_base_set_size(&djuiTextAct[i]->base, configShowPing ? 65 : 100, 32.0f);
+    djui_base_set_size(&djuiTextAct[i]->base, 65, 32.0f);
 }
 
 void djui_panel_playerlist_on_render_pre(UNUSED struct DjuiBase* base, UNUSED bool* skipRender) {

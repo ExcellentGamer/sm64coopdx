@@ -13,7 +13,7 @@
 #include "src/game/mario.h"
 #include "src/game/rumble_init.h"
 #include "src/pc/djui/djui_popup.h"
-#include "src/pc/network/network_utils.h"
+#include "pc/network/network_utils.h"
 #include "src/pc/djui/djui_console.h"
 #include "src/pc/djui/djui_chat_message.h"
 #include "src/pc/djui/djui_language.h"
@@ -23,8 +23,8 @@
 #include "src/game/sound_init.h"
 #include "src/pc/djui/djui_hud_utils.h"
 #include "src/pc/djui/djui_panel_menu.h"
-#include "src/pc/network/network_player.h"
-#include "src/pc/network/lag_compensation.h"
+#include "pc/network/network_player.h"
+#include "pc/network/lag_compensation.h"
 #include "include/behavior_table.h"
 #include "src/pc/lua/utils/smlua_obj_utils.h"
 #include "src/pc/lua/utils/smlua_misc_utils.h"
@@ -53,7 +53,7 @@
 #include "src/engine/behavior_script.h"
 #include "src/audio/seqplayer.h"
 #include "src/engine/lighting_engine.h"
-#include "src/pc/network/sync_object.h"
+#include "pc/network/sync_object.h"
 
 
   ///////////////

@@ -52,7 +52,7 @@ void sent_history_init(ArrayList *arrayList) {
 }
 
 void sent_history_add_message(ArrayList *arrayList, const char *newMessage) {
-    if (!configUseStandardKeyBindingsChat && (!newMessage || newMessage[0] != '/')) { return; }
+    if (!newMessage || newMessage[0] != '/') { return; }
 
     if (arrayList->size == MAX_HISTORY_SIZE) {
         for (s32 i = 1; i < MAX_HISTORY_SIZE; i++) {
@@ -103,7 +103,7 @@ bool djui_chat_box_render(struct DjuiBase* base) {
     djui_base_set_size(ccBase, 1.0f, chatBox->base.comp.height - 32 - 8);
     if (chatBox->scrolling) {
         f32 yMax = chatBox->chatContainer->base.elem.height - chatBox->chatFlow->base.height.value;
-        f32 target = chatBox->chatFlow->base.y.value + (chatBox->scrollY - chatBox->chatFlow->base.y.value) * (configSmoothScrolling ? 0.5f : 1.f);
+        f32 target = chatBox->chatFlow->base.y.value + (chatBox->scrollY - chatBox->chatFlow->base.y.value) * (0.5f);
 
         chatBox->chatFlow->base.y.value = clamp(target, yMax, 0.f);
         if (target < yMax || 0.f < target) {
@@ -425,30 +425,20 @@ static bool djui_chat_box_input_on_key_down(UNUSED struct DjuiBase* base, int sc
 
     switch (scancode) {
         case SCANCODE_UP:
-            if (!configUseStandardKeyBindingsChat && (gDjuiChatBox->chatInput && gDjuiChatBox->chatInput->buffer && gDjuiChatBox->chatInput->buffer[0] != '/')) {
-                gDjuiChatBox->scrollY += 15;
-                break;
-            } else {
-                sent_history_update_current_message(&sentHistory, gDjuiChatBox->chatInput->buffer);
-                sent_history_navigate(&sentHistory, true);
-                if (strcmp(previousText, gDjuiChatBox->chatInput->buffer) != 0) { reset_tab_completion_all(); }
-                return true;
-            }
+            sent_history_update_current_message(&sentHistory, gDjuiChatBox->chatInput->buffer);
+            sent_history_navigate(&sentHistory, true);
+            if (strcmp(previousText, gDjuiChatBox->chatInput->buffer) != 0) { reset_tab_completion_all(); }
+            return true;
         case SCANCODE_DOWN:
-            if (!configUseStandardKeyBindingsChat && (gDjuiChatBox->chatInput && gDjuiChatBox->chatInput->buffer && gDjuiChatBox->chatInput->buffer[0] != '/')) {
-                gDjuiChatBox->scrollY -= 15;
-                break;
-            } else {
-                sent_history_update_current_message(&sentHistory, gDjuiChatBox->chatInput->buffer);
-                sent_history_navigate(&sentHistory, false);
-                if (strcmp(previousText, gDjuiChatBox->chatInput->buffer) != 0) { reset_tab_completion_all(); }
-                return true;
-            }
+            sent_history_update_current_message(&sentHistory, gDjuiChatBox->chatInput->buffer);
+            sent_history_navigate(&sentHistory, false);
+            if (strcmp(previousText, gDjuiChatBox->chatInput->buffer) != 0) { reset_tab_completion_all(); }
+            return true;
         case SCANCODE_PAGE_UP:
-            gDjuiChatBox->scrollY += configUseStandardKeyBindingsChat ? 15 : pageAmount;
+            gDjuiChatBox->scrollY += pageAmount;
             break;
         case SCANCODE_PAGE_DOWN:
-            gDjuiChatBox->scrollY -= configUseStandardKeyBindingsChat ? 15 : pageAmount;
+            gDjuiChatBox->scrollY -= pageAmount;
             break;
         case SCANCODE_POS1:
             gDjuiChatBox->scrollY += pageAmount;
